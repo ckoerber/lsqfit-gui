@@ -1,0 +1,3 @@
+lsqfit
+pandas
+streamlit
