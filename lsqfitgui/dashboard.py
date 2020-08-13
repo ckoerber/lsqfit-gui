@@ -16,6 +16,8 @@ from streamlit import (
     plotly_chart,
     checkbox,
 )
+from plotly.subplots import make_subplots
+from scipy.stats import norm
 from pandas import DataFrame
 import plotly.express as px
 import numpy as np
@@ -115,14 +117,42 @@ def get_fit_fig(fit):
     return fig, r_fig
 
 
-def init_dasboard(fit: nonlinear_fit):
+COLORS = {"prior": "blue", "posterior": "green"}
+
+
+def get_p2p_fig(fit):
+    fig = make_subplots(
+        rows=len(fit.p), shared_xaxes=False, subplot_titles=list(fit.p.keys())
+    )
+    for n, (key, prior) in enumerate(fit.prior.items()):
+        posterior = fit.p[key]
+
+        for which, val in [("prior", prior), ("posterior", posterior)]:
+            x = np.linspace(val.mean - 5 * val.sdev, val.mean + 5 * val.sdev, 200)
+            y = norm(val.mean, val.sdev).pdf(x)
+            fig.add_trace(
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    fill="tozeroy",
+                    name=which,
+                    line_color=COLORS[which],
+                    showlegend=n == 0,
+                ),
+                row=n + 1,
+                col=1,
+            )
+    return fig
+
+
+def init_dasboard(input_fit: nonlinear_fit):
     """Initializes dashboard from fit."""
     title("lsqfit-gui")
     header("Fit function")
-    latex("f(x) = " + parse_fit_fcn(fit))
+    latex("f(x) = " + parse_fit_fcn(input_fit))
 
-    prior = sidebar_from_prior(fit.prior)
-    fit = nonlinear_fit(fit.data, fit.fcn, prior)
+    prior = sidebar_from_prior(input_fit.prior)
+    fit = nonlinear_fit(input_fit.data, input_fit.fcn, prior)
 
     header("Plot")
     subheader("Data vs fit")
@@ -137,3 +167,8 @@ def init_dasboard(fit: nonlinear_fit):
     if show_details:
         header("Fit details")
         code(fit.format(maxline=True), language=None)
+
+    show_p2p = checkbox("Show posterior vs prior", value=True)
+    if show_p2p:
+        header("Posteriors and priors")
+        plotly_chart(get_p2p_fig(fit))
