@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Setup file for lsqfitgui
-"""
+"""Setup file for lsqfitgui."""
 
 __author__ = "@ckoerber"
 

@@ -3,8 +3,6 @@
 from argparse import ArgumentParser
 from lsqfitgui.dashboard import init_dasboard
 from gvar import load
-from pickle import loads
-import streamlit
 
 import importlib.util
 
