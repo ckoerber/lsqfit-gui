@@ -8,9 +8,9 @@ from streamlit import sidebar, title, text
 def add_gvar_widget(parent, name: str, gv: GVar):
     """Adds widget to parent for given gvar."""
     m, s = gv.mean, gv.sdev
-    parent.label(name)
+    parent.text(name)
     mean = parent.number_input(label="mean", value=m, step=s / 3, key=f"{name}_mean")
-    sdev = parent.text_input(label="sdev", value=s, step=s / 3, key=f"{name}_sdev")
+    sdev = parent.number_input(label="sdev", value=s, step=s / 3, key=f"{name}_sdev")
     return mean, sdev
 
 
