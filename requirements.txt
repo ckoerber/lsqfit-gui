@@ -1,3 +1,5 @@
 lsqfit
 pandas
+sympy
+plotly
 streamlit
