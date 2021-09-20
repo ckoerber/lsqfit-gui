@@ -157,11 +157,10 @@ COLORS = {"prior": "blue", "posterior": "green"}
 
 
 def get_p2p_fig(fit):
-    fig = make_subplots(
-        rows=len(fit.p), shared_xaxes=False, subplot_titles=list(fit.p.keys())
-    )
+    figs = {}
     for n, (key, prior) in enumerate(fit.prior.items()):
         posterior = fit.p[key]
+        fig = go.Figure(layout_title=key,)
 
         for which, val in [("prior", prior), ("posterior", posterior)]:
             x = np.linspace(val.mean - 3 * val.sdev, val.mean + 3 * val.sdev, 200)
@@ -175,19 +174,22 @@ def get_p2p_fig(fit):
                     line_color=COLORS[which],
                     showlegend=n == 0,
                 ),
-                row=n + 1,
-                col=1,
             )
-    return fig
+        figs[key] = fig
+    return figs
 
 
 def init_dasboard(input_fit: nonlinear_fit):
     """Initializes dashboard from fit."""
     set_page_config(layout="wide")
     title("lsqfit-gui")
-    with expander("Show fit function", expanded=False):
-        header("Fit function")
-        latex("f(x) = " + parse_fit_fcn(input_fit))
+    try:
+        expr = parse_fit_fcn(input_fit)
+        with expander("Show fit function", expanded=False):
+            header("Fit function")
+            latex("f(x) = " + expr)
+    except Exception:
+        pass
 
     prior = sidebar_from_prior(input_fit.prior)
     fit = nonlinear_fit(input_fit.data, input_fit.fcn, prior)
@@ -197,15 +199,19 @@ def init_dasboard(input_fit: nonlinear_fit):
         code(fit.format(maxline=True), language=None)
 
     header("Plots")
-    with expander("Show fit", expanded=True):
-        subheader("Data vs fit")
+    try:
         fig_fit, fig_residuals = get_fit_fig(fit)
-        plotly_chart(fig_fit, use_container_width=True)
+        with expander("Show fit", expanded=True):
+            subheader("Data vs fit")
+            plotly_chart(fig_fit, use_container_width=True)
 
-    with expander("Show residuals", expanded=False):
-        subheader("Residuals")
-        plotly_chart(fig_residuals, use_container_width=True)
+        with expander("Show residuals", expanded=False):
+            subheader("Residuals")
+            plotly_chart(fig_residuals, use_container_width=True)
+    except Exception as error:
+        warning(f"Failed to plot fit function:\n{error}")
 
-    with expander("Show posterior vs prior", expanded=False):
-        header("Posteriors and priors")
-        plotly_chart(get_p2p_fig(fit), use_container_width=True)
+    header("Posteriors and priors")
+    for key, fig in get_p2p_fig(fit).items():
+        with expander(key, expanded=False):
+            plotly_chart(fig, use_container_width=True)
