@@ -87,7 +87,16 @@ def generate_data(fit) -> DataFrame:
 
 
 def get_fit_bands(fit):
-    x = np.linspace(fit.x.min(), fit.x.max(), 100)
+    try:
+        if isinstance(fit.x, dict):
+            x = {
+                key: np.linspace(val.min(), val.max(), 100)
+                for key, val in fit.x.items()
+            }
+        else:
+            x = np.linspace(fit.x.min(), fit.x.max(), 100)
+    except Exception:
+        x = fit.x
     y = fit.fcn(x, fit.p)
     m = gv.mean(y)
     s = gv.sdev(y)
@@ -96,56 +105,110 @@ def get_fit_bands(fit):
 
 def get_residuals(fit):
     y_fit = fit.fcn(fit.x, fit.p)
-    return (gv.mean(fit.y) - y_fit) / gv.sdev(fit.y)
+
+    if not isinstance(fit.y, (dict, gv.BufferDict)):
+        res = (gv.mean(fit.y) - y_fit) / gv.sdev(fit.y)
+    else:
+        res = {}
+        for key, val in y_fit.items():
+            res[key] = (gv.mean(fit.y[key]) - val) / gv.sdev(fit.y[key])
+
+    return res
 
 
-def get_fit_fig(fit):
-    data = DataFrame(
-        data=np.transpose([fit.x, gv.mean(fit.y), gv.sdev(fit.y)]),
-        columns=["x", "y", "y_err"],
-    )
-    x_fit, y_fit_min, y_fit_mean, y_fit_max = get_fit_bands(fit)
-    fig = go.Figure()
+def plot_errors(fig, x, y, err, name="Data", **kwargs):
+    if not isinstance(x, (list, np.ndarray)):
+        x = np.arange(len(y))
     fig.add_trace(
         go.Scatter(
-            x=data["x"].values,
-            y=data["y"].values,
-            error_y={"type": "data", "array": data["y_err"].values},
-            name="Data",
-            mode="markers",
-        )
+            x=x, y=y, error_y={"type": "data", "array": err}, name=name, mode="markers",
+        ),
+        **kwargs,
     )
+
+
+def plot_band(fig, x, y_min, y_mean, y_max, name="Fit", **kwargs):
+    if not isinstance(x, (list, np.ndarray)):
+        x = np.arange(len(y_mean))
     fig.add_trace(
         go.Scatter(
-            x=list(x_fit) + list(x_fit)[::-1],
-            y=list(y_fit_max) + list(y_fit_min)[::-1],
+            x=list(x) + list(x)[::-1],
+            y=list(y_max) + list(y_min)[::-1],
             fill="toself",
             mode="lines",
             line_color="indigo",
-            name="Fit",
+            name=name,
             opacity=0.8,
-            legendgroup="fit",
-        )
+            legendgroup=name,
+        ),
+        **kwargs,
     )
     fig.add_trace(
         go.Scatter(
-            x=x_fit,
-            y=y_fit_mean,
+            x=x,
+            y=y_mean,
             mode="lines",
             line_color="indigo",
             showlegend=False,
-            legendgroup="fit",
-        )
+            legendgroup=name,
+        ),
+        **kwargs,
     )
+
+
+def get_fit_fig(fit):
+
+    x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit)
     residuals = get_residuals(fit)
-    data = DataFrame(
-        data=np.transpose([fit.x, gv.mean(residuals), gv.sdev(residuals)]),
-        columns=["x", "r", "r_err"],
-    )
-    r_fig = px.scatter(data, x="x", y="r", error_y="r_err")
-    r_fig.add_trace(
-        go.Scatter(x=fit.x, y=np.zeros(len(fit.x)), mode="lines", line_color="black")
-    )
+    if not isinstance(fit.y, (dict, gv.BufferDict)):
+        fig, r_fig = go.Figure(), go.Figure()
+        plot_errors(fig, fit.x, gv.mean(fit.y), gv.sdev(fit.y))
+        plot_band(fig, fit.x, y_min_fit, y_mean_fit, y_max_fit)
+        plot_errors(fig, fit.x, gv.mean(residuals), gv.sdev(residuals))
+    else:
+        fig = make_subplots(cols=1, rows=len(fit.y), subplot_titles=list(fit.y.keys()))
+        r_fig = make_subplots(
+            cols=1, rows=len(fit.y), subplot_titles=list(fit.y.keys())
+        )
+
+        for n, (key, yy) in enumerate(fit.y.items()):
+            xx = fit.x[key] if isinstance(fit.x, dict) else fit.x
+            plot_errors(
+                fig, xx, gv.mean(yy), gv.sdev(yy), name=f"{key} data", row=n + 1, col=1
+            )
+            plot_band(
+                fig,
+                xx,
+                y_min_fit[key],
+                y_mean_fit[key],
+                y_max_fit[key],
+                name=f"{key} fit",
+                row=n + 1,
+                col=1,
+            )
+            plot_errors(
+                r_fig,
+                xx,
+                gv.mean(residuals[key]),
+                gv.sdev(residuals[key]),
+                name=key,
+                row=n + 1,
+                col=1,
+            )
+
+        fig.update_layout(height=len(fit.y) * 300)
+        r_fig.update_layout(height=len(fit.y) * 300)
+        r_fig.add_hline(0, line={"color": "black"})
+
+    # residuals = get_residuals(fit)
+    # data = DataFrame(
+    #     data=np.transpose([fit.x, gv.mean(residuals), gv.sdev(residuals)]),
+    #     columns=["x", "r", "r_err"],
+    # )
+    # r_fig = px.scatter(data, x="x", y="r", error_y="r_err")
+    # r_fig.add_trace(
+    #     go.Scatter(x=fit.x, y=np.zeros(len(fit.x)), mode="lines", line_color="black")
+    # )
 
     fig.update_layout(
         template="plotly_white", font={"size": 16}, hoverlabel={"font_size": 16},
@@ -210,6 +273,7 @@ def init_dasboard(input_fit: nonlinear_fit):
             plotly_chart(fig_residuals, use_container_width=True)
     except Exception as error:
         warning(f"Failed to plot fit function:\n{error}")
+        raise error
 
     header("Posteriors and priors")
     for key, fig in get_p2p_fig(fit).items():
