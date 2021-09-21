@@ -1,7 +1,7 @@
 """Reads fit from pickle file and initializes dashboard."""
 
 from argparse import ArgumentParser
-from lsqfitgui.dashboard import init_dasboard
+from lsqfitgui.dashboard import init_dashboard
 from gvar import load
 
 import importlib.util
@@ -36,7 +36,7 @@ def main():
         if not args.function:
             raise ValueError("You must specify the fit function.")
         fit.fcn = parse_function(args.function)
-    init_dasboard(fit)
+    init_dashboard(fit)
 
 
 if __name__ == "__main__":

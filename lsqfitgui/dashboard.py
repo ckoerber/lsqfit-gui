@@ -242,7 +242,7 @@ def get_p2p_fig(fit):
     return figs
 
 
-def init_dasboard(input_fit: nonlinear_fit):
+def init_dashboard(input_fit: nonlinear_fit):
     """Initializes dashboard from fit."""
     set_page_config(layout="wide")
     title("lsqfit-gui")
