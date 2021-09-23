@@ -22,15 +22,15 @@ def run_server(fit, name: str = "Lsqfit GUI", debug: bool = True, **kwargs):
         Output("body", "children"), Input(*DASHBOARD_FORM_INPUT),
     )
     def display_output(prior_values):
-        prior_values = np.array(prior_values, dtype=float).reshape(
-            len(prior_values) // 2, 2
+        prior_values = (
+            np.array(prior_values, dtype=float).reshape(len(prior_values) // 2, 2).T
         )
-        print(prior_values)
+        if any(prior_values[1] <= 0):
+            raise ValueError("Standard deviations must larger zero.")
         prior = {
             key: val
-            for key, val in zip(fit.p, gv.gvar(prior_values[:, 0], prior_values[:, 1]))
+            for key, val in zip(fit.p, gv.gvar(prior_values[0], prior_values[1]))
         }
-        print(prior)
         new_fit = nonlinear_fit(fit.data, fit.fcn, prior)
         return get_layout(new_fit)
 

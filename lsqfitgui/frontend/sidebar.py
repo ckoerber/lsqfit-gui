@@ -16,19 +16,19 @@ SIDEBAR_STYLE = {
 }
 
 
-def get_gvar_widget(name: str, value: float) -> dbc.FormGroup:
-    """
-    """
+def get_float_widget(name: str, value: float, **kwargs) -> dbc.FormGroup:
+    """Create form group for float input."""
     return dbc.FormGroup(
         [
             dbc.Label(name, html_for=f"input-prior-{name}"),
             dbc.Input(
-                type="text",
+                type="number",
                 id={"type": "prior", "index": name},
                 placeholder=name,
                 value=str(value),
                 className="form-control-sm",
                 debounce=True,
+                **kwargs,
             ),
         ],
         className="col-xs-6 col-sm-12 col-md-6 col-xl-3 col-xxl-2",
@@ -43,7 +43,7 @@ def get_sidebar(elements: Dict[str, GVar], title: str = "Priors"):
             html.Hr(),
             dbc.Row(
                 [
-                    get_gvar_widget(f"{name}-{kind}", value)
+                    get_float_widget(f"{name}-{kind}", value)
                     for name, dist in elements.items()
                     for kind, value in zip(["mean", "sdev"], [dist.mean, dist.sdev])
                 ],
