@@ -13,7 +13,6 @@ from lsqfitgui.plot.uncertainty import plot_errors, plot_band
 def plot_fit(fit, fig: Optional[Figure] = None):
     """Plot data and fit error bands."""
     x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit)
-    print(get_fit_bands(fit))
 
     if not isinstance(fit.y, (dict, gv.BufferDict)):
         fig = fig or Figure()

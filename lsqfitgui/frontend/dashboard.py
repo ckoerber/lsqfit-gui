@@ -11,8 +11,8 @@ def get_layout(fit, **kwargs):
     """
     sidebar = get_sidebar(fit.prior)
     content = get_content(fit)
-    sidebar.className = "col-xs-12 col-sm-3 col-md-3 col-lg-4"
-    content.className = "col-xs-12 col-sm-9 col-md-9 col-lg-8"
+    sidebar.className = "col-xs-12 col-sm-3 col-md-3 col-xl-4 col-xxl-2"
+    content.className = "col-xs-12 col-sm-9 col-md-9 col-xl-8 col-xxl-10"
     layout = html.Div(
         children=html.Div(children=[sidebar, content], className="row"),
         className="container-fluid",
