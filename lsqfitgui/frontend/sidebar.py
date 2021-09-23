@@ -28,6 +28,7 @@ def get_gvar_widget(name: str, value: float) -> dbc.FormGroup:
                 placeholder=name,
                 value=str(value),
                 className="form-control-sm",
+                debounce=True,
             ),
         ],
         className="col-xs-6 col-sm-12 col-md-6 col-xl-3 col-xxl-2",
