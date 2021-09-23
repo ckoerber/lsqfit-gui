@@ -4,6 +4,7 @@ from typing import Dict
 from gvar import GVar
 
 from dash import html
+from dash.dependencies import ALL
 
 import dash_bootstrap_components as dbc
 
@@ -23,9 +24,9 @@ def get_gvar_widget(name: str, value: float) -> dbc.FormGroup:
             dbc.Label(name, html_for=f"input-prior-{name}"),
             dbc.Input(
                 type="text",
-                id=f"input-prior-{name}",
+                id={"type": "prior", "index": name},
                 placeholder=name,
-                value=f"{value:1.4e}",
+                value=str(value),
                 className="form-control-sm",
             ),
         ],
@@ -46,7 +47,11 @@ def get_sidebar(elements: Dict[str, GVar], title: str = "Priors"):
                     for kind, value in zip(["mean", "sdev"], [dist.mean, dist.sdev])
                 ],
                 form=True,
+                id="prior-form",
             ),
         ],
         style=SIDEBAR_STYLE,
     )
+
+
+SIDEBAR_FORM_INPUT = ({"type": "prior", "index": ALL}, "value")
