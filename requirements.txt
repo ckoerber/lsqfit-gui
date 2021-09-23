@@ -2,4 +2,4 @@ lsqfit
 pandas
 sympy
 plotly
-streamlit
+dash
