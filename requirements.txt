@@ -3,3 +3,4 @@ pandas
 sympy
 plotly
 dash
+dash-bootstrap-components
