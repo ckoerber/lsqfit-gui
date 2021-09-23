@@ -1,3 +1,0 @@
-#!/bin/bash
-
-streamlit run lsqfitgui/entrypoint.py  -- "$@"
