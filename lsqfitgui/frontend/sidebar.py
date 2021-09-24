@@ -1,5 +1,5 @@
 """Sidebar definitions for dash app."""
-from typing import Dict
+from typing import Dict, Optional
 
 from gvar import GVar
 
@@ -34,11 +34,25 @@ def get_float_widget(
     )
 
 
-def get_sidebar(elements: Dict[str, GVar], title: str = "Priors"):
+def get_sidebar(elements: Dict[str, GVar], meta_config: Optional[Dict] = None):
     """Create sidebar."""
+    if meta_config is not None:
+        meta_elements = [html.H4("Meta"), html.Hr()]
+        for config in meta_config:
+            config = config.copy()
+            name = config.pop("name")
+            config["debounce"] = True
+            config["className"] = "form-control-sm"
+            config["id"] = {"type": "meta", "index": name}
+            meta_elements.append(dbc.Input(**config,))
+        meta_elements.append(html.Hr())
+    else:
+        meta_elements = []
+
     return html.Div(
-        children=[
-            html.H4(title),
+        children=meta_elements
+        + [
+            html.H4("Priors"),
             html.Hr(),
             dbc.Form(
                 dbc.Table(
@@ -76,4 +90,5 @@ def get_sidebar(elements: Dict[str, GVar], title: str = "Priors"):
     )
 
 
-SIDEBAR_FORM_INPUT = ({"type": "prior", "index": ALL}, "value")
+SIDEBAR_PRIOR_INPUT = ({"type": "prior", "index": ALL}, "value")
+SIDEBAR_META_INPUT = ({"type": "meta", "index": ALL}, "value")

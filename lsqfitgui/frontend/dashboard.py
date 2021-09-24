@@ -2,7 +2,11 @@
 from dash import html
 from dash_bootstrap_components.themes import BOOTSTRAP
 
-from lsqfitgui.frontend.sidebar import get_sidebar, SIDEBAR_FORM_INPUT
+from lsqfitgui.frontend.sidebar import (
+    get_sidebar,
+    SIDEBAR_PRIOR_INPUT,
+    SIDEBAR_META_INPUT,
+)
 from lsqfitgui.frontend.content import get_content
 from lsqfitgui.backend.sidebar import process_priors
 
@@ -33,10 +37,11 @@ def get_layout(fit, **kwargs):
 
 
 EXTERNAL_STYLESHEETS = [BOOTSTRAP]
-DASHBOARD_FORM_INPUT = SIDEBAR_FORM_INPUT
+DASHBOARD_PRIOR_INPUT = SIDEBAR_PRIOR_INPUT
+DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 
 
-def update_layout(inp, initial_fit):
+def update_layout(inp, initial_fit, **kwargs):
     """Parses form input values to create new layout."""
     new_fit = process_priors(inp, initial_fit)
     return get_layout(new_fit)
