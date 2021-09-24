@@ -14,25 +14,10 @@ def get_content(fit, name: str = "Lsqfit GUI"):
             dcc.Tabs(
                 [
                     dcc.Tab(
-                        children=html.Div(
-                            [
-                                html.Div(
-                                    children=[
-                                        html.H2(children="Fit"),
-                                        dcc.Graph(figure=fig_fit),
-                                    ],
-                                    className="col-lg-8",
-                                ),
-                                html.Div(
-                                    children=[
-                                        html.H2(children="Details"),
-                                        html.Pre(children=fit.format(maxline=True)),
-                                    ],
-                                    className="col-lg-4",
-                                ),
-                            ],
-                            className="row",
-                        ),
+                        children=[
+                            html.H2(children="Details"),
+                            html.Pre(children=fit.format(maxline=True)),
+                        ],
                         label="Details",
                         value="details",
                     ),
