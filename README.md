@@ -25,11 +25,13 @@ or use the console script entry point pointing to a `gvar` pickeled fit (and a f
 #other_script.py
 import gvar as gv
 from lsqfit import nonlinear_fit
+
 def fcn(x, p):
     y = ...
     return y
 
 ...
+
 fit = nonlinear_fit(data, fcn=fcn, prior=prior)
 gv.dump(fit, "fit.p")
 ```
