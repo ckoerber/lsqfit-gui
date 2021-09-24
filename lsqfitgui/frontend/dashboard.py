@@ -48,10 +48,14 @@ DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 
 
 def update_layout_from_prior(
-    prior, setup, initial_fit, meta_config: Optional[Dict[str, Any]] = None, **kwargs,
+    prior,
+    initial_fit,
+    setup: Optional[Dict[str, Any]] = None,
+    meta_config: Optional[Dict[str, Any]] = None,
+    **kwargs,
 ):
     """Parses form input values to create new layout."""
-    setup = process_meta(setup, meta_config)
+    setup = process_meta(setup, meta_config) if setup else None
     new_fit = process_priors(prior, initial_fit)
     return get_layout(new_fit, meta_config=meta_config, meta_values=setup), new_fit
 

@@ -69,7 +69,7 @@ class FitGUI:
             self._setup_old = setup
         elif prior != self._prior_old:
             self._layout, self._fit = update_layout_from_prior(
-                prior, setup, self.fit, meta_config=self._meta_config,
+                prior, self.fit, setup=setup, meta_config=self._meta_config,
             )
             self._prior_old = prior
 
