@@ -1,8 +1,6 @@
 """"""
 from dash import html, dcc
 
-import dash_bootstrap_components as dbc
-
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
 
 
@@ -13,9 +11,9 @@ def get_content(fit, name: str = "Lsqfit GUI"):
     content = html.Div(
         children=[
             html.H1(children=name),
-            dbc.Tabs(
+            dcc.Tabs(
                 [
-                    dbc.Tab(
+                    dcc.Tab(
                         children=html.Div(
                             [
                                 html.Div(
@@ -36,23 +34,27 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                             className="row",
                         ),
                         label="Details",
-                        tab_id="details",
+                        value="details",
                     ),
-                    dbc.Tab(
+                    dcc.Tab(
                         children=[html.H2(children="Fit"), dcc.Graph(figure=fig_fit)],
                         label="Fit",
-                        tab_id="fit",
+                        value="fit",
                     ),
-                    dbc.Tab(
+                    dcc.Tab(
                         children=[
                             html.H2(children="Residuals"),
                             dcc.Graph(figure=fig_residuals),
                         ],
                         label="Residuals",
-                        tab_id="residuals",
+                        value="residuals",
                     ),
                 ],
-                active_tab="details",
+                value="details",
+                persistence=True,
+                persistence_type="local",
+                persisted_props=["value"],
+                id="content-tabs",
             ),
         ]
     )
