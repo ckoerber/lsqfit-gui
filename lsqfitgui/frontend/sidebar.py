@@ -37,14 +37,22 @@ def get_float_widget(
 def get_sidebar(elements: Dict[str, GVar], meta_config: Optional[Dict] = None):
     """Create sidebar."""
     if meta_config is not None:
-        meta_elements = [html.H4("Meta"), html.Hr()]
+        meta_elements = [html.H4("Meta")]
         for config in meta_config:
             config = config.copy()
             name = config.pop("name")
             config["debounce"] = True
             config["className"] = "form-control-sm"
             config["id"] = {"type": "meta", "index": name}
-            meta_elements.append(dbc.Input(**config,))
+            meta_elements.append(
+                dbc.FormGroup(
+                    [
+                        dbc.Label(name, html_for=f"input-meta-{name}", width=4),
+                        dbc.Col(dbc.Input(**config), width=8),
+                    ],
+                    row=True,
+                )
+            )
         meta_elements.append(html.Hr())
     else:
         meta_elements = []
@@ -53,7 +61,6 @@ def get_sidebar(elements: Dict[str, GVar], meta_config: Optional[Dict] = None):
         children=meta_elements
         + [
             html.H4("Priors"),
-            html.Hr(),
             dbc.Form(
                 dbc.Table(
                     [html.Thead([html.Th("name"), html.Th("mean"), html.Th("sdev")])]
