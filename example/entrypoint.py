@@ -13,14 +13,7 @@ def main():
         fit_setup_function=generate_fit,
         fit_setup_kwargs={"n_poly": 4},
         meta_config=[
-            {
-                "name": "n_poly",
-                "type": "number",
-                "min": 1,
-                "max": 10,
-                "step": 1,
-                "value": 4,
-            }
+            {"name": "n_poly", "type": "number", "min": 1, "max": 10, "step": 1}
         ],
     )
 

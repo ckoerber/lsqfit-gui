@@ -14,3 +14,9 @@ def process_priors(prior_values, initial_fit):
         for key, val in zip(initial_fit.p, gv.gvar(prior_values[0], prior_values[1]))
     }
     return nonlinear_fit(initial_fit.data, initial_fit.fcn, prior)
+
+
+def process_meta(meta_array, meta_config):
+    """
+    """
+    return {config["name"]: val for config, val in zip(meta_config, meta_array)}

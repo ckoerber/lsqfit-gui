@@ -6,9 +6,11 @@ from dash.dependencies import Input, Output
 
 from lsqfitgui.frontend.dashboard import (
     get_layout,
-    update_layout,
+    update_layout_from_prior,
+    update_layout_from_meta,
     EXTERNAL_STYLESHEETS,
     DASHBOARD_PRIOR_INPUT,
+    DASHBOARD_META_INPUT,
 )
 
 
@@ -39,26 +41,52 @@ class FitGUI:
         else:
             self.initial_fit = fit
 
-        self._layout = get_layout(self.initial_fit, meta_config=self._meta_config)
-        self._callbacks = [self._prior_callback]
-
-    def update_layout(self, prior):
-        """Update the layout given new prior input."""
-        self._layout = update_layout(
-            prior, self.initial_fit, meta_config=self._meta_config
+        self._layout = get_layout(
+            self.initial_fit,
+            meta_config=self._meta_config,
+            meta_values=self._fit_setup_kwargs,
         )
+        self._callbacks = [self._fit_callback]
+
+        self._setup_old = list(self._fit_setup_kwargs.values())
+        self._prior_old = None
+        self._fit = self.initial_fit
+
+    @property
+    def fit(self):
+        """Stores current fit object."""
+        return self._fit
+
+    def update_layout(self, prior, setup):
+        """Update the layout given new prior input."""
+        if setup != self._setup_old:
+            self._layout, self._fit = update_layout_from_meta(
+                setup,
+                self._fit_setup_function,
+                self._fit_setup_kwargs,
+                meta_config=self._meta_config,
+            )
+            self._setup_old = setup
+        elif prior != self._prior_old:
+            self._layout, self._fit = update_layout_from_prior(
+                prior, setup, self.fit, meta_config=self._meta_config,
+            )
+            self._prior_old = prior
 
     @property
     def layout(self):
         """Return the current layout."""
         return self._layout
 
-    def _prior_callback(self, *args, **kwargs):
+    def _fit_callback(self, *args, **kwargs):
         self.update_layout(*args, **kwargs)
         return self.layout
 
-    _prior_callback.output = Output("body", "children")
-    _prior_callback.input = Input(*DASHBOARD_PRIOR_INPUT)
+    _fit_callback.output = Output("body", "children")
+    _fit_callback.input = [
+        Input(*DASHBOARD_PRIOR_INPUT),
+        Input(*DASHBOARD_META_INPUT),
+    ]
 
     def setup(self, app):
         """Initialize the dash app."""

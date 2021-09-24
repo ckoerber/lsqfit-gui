@@ -34,7 +34,11 @@ def get_float_widget(
     )
 
 
-def get_sidebar(elements: Dict[str, GVar], meta_config: Optional[Dict] = None):
+def get_sidebar(
+    elements: Dict[str, GVar],
+    meta_config: Optional[Dict] = None,
+    meta_values: Optional[Dict] = None,
+):
     """Create sidebar."""
     if meta_config is not None:
         meta_elements = [html.H4("Meta")]
@@ -44,6 +48,7 @@ def get_sidebar(elements: Dict[str, GVar], meta_config: Optional[Dict] = None):
             config["debounce"] = True
             config["className"] = "form-control-sm"
             config["id"] = {"type": "meta", "index": name}
+            config["value"] = meta_values[name]
             meta_elements.append(
                 dbc.FormGroup(
                     [
