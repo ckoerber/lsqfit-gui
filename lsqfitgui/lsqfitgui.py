@@ -3,8 +3,9 @@ from typing import Optional, Callable, Dict, List, Any
 
 from tempfile import NamedTemporaryFile
 
-from gvar import dumps
+from gvar import dumps, evalcorr
 from lsqfit import nonlinear_fit
+from numpy import eye, allclose
 
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
@@ -51,6 +52,11 @@ class FitGUI:
             self.initial_fit = fit_setup_function(**self._fit_setup_kwargs)
         else:
             self.initial_fit = fit
+
+        if not allclose(
+            evalcorr(self.initial_fit.prior.values()), eye(len(self.initial_fit.prior))
+        ):
+            raise NotImplementedError("Prior of original fit contains correlations.")
 
         self._layout = get_layout(
             self.initial_fit,
