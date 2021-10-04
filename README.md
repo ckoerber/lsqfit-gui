@@ -22,7 +22,7 @@ from lsqfitgui import run_server
 fit = nonlinear_fit(data, fcn=fcn, prior=prior)
 run_server(fit)
 ```
-or use the console script entry point pointing to a `gvar` pickeled fit (and a fit function)
+or use the console script entry point pointing to a `gvar` pickeled fit (and a fit function which is not stored in the pickled file)
 ```python
 #other_script.py
 import gvar as gv
@@ -42,7 +42,7 @@ and run
 lsqfitgui [--function other_script.py:fcn] fit.p
 ```
 
-Both commands will spawn a local serve to interface.
+Both commands will spawn a local server to interface.
 
 ## Advanced configuration
 
