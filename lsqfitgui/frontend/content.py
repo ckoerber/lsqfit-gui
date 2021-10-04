@@ -1,4 +1,4 @@
-""""""
+"""Submodule providing GUI content."""
 from dash import html, dcc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
@@ -6,7 +6,10 @@ from lsqfitgui.util.function import document_function
 
 
 def get_content(fit, name: str = "Lsqfit GUI"):
+    """Create default content block for fit object.
 
+    This includes the plots for the data, residuals and details.
+    """
     fig_fit = plot_fit(fit)
     fig_residuals = plot_residuals(fit)
     content = html.Div(

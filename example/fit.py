@@ -10,7 +10,7 @@ np.random.seed(42)
 
 
 def fcn(x, p):
-    """Returns polyinomial function.
+    """Return polyinomial function.
 
     Arguemnts:
         x: Indepdent variable (array)

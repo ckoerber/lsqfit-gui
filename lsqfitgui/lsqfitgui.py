@@ -1,5 +1,7 @@
 """Lsqfit GUI."""
-from typing import Optional, Callable, Dict, List
+from typing import Optional, Callable, Dict, List, Any
+
+from lsqfit import nonlinear_fit
 
 from dash import Dash, html
 from dash.dependencies import Input, Output
@@ -15,7 +17,7 @@ from lsqfitgui.frontend.dashboard import (
 
 
 class FitGUI:
-    """Class which initializes the dashboar."""
+    """Class which initializes the dashboard."""
 
     def __init__(
         self,
@@ -60,7 +62,7 @@ class FitGUI:
 
     @property
     def fit(self):
-        """Stores current fit object."""
+        """Return current fit object."""
         return self._fit
 
     def update_layout(self, prior, setup):
@@ -110,14 +112,14 @@ class FitGUI:
 
 
 def run_server(
-    fit: Optional[Dict] = None,
+    fit: Optional[nonlinear_fit] = None,
     name: str = "Lsqfit GUI",
     debug: bool = True,
-    fit_setup_function: Optional[Callable] = None,
+    fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
     use_default_content: Optional[bool] = True,
-    get_additional_content: Optional[html.Base] = None,
+    get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     **kwargs
 ):
     """Provide dashboard for lsqfitgui."""
