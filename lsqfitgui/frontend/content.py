@@ -2,6 +2,7 @@
 from dash import html, dcc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
+from lsqfitgui.util.function import document_function
 
 
 def get_content(fit, name: str = "Lsqfit GUI"):
@@ -11,6 +12,18 @@ def get_content(fit, name: str = "Lsqfit GUI"):
     content = html.Div(
         children=[
             html.H1(children=name),
+            html.Div(
+                html.Div(
+                    [
+                        html.H4("Fit function"),
+                        html.Pre(document_function(fit.fcn)),
+                        html.H4("Fit parameters"),
+                        html.Pre(str(fit)),
+                    ],
+                    className="col",
+                ),
+                className="row",
+            ),
             dcc.Tabs(
                 [
                     dcc.Tab(

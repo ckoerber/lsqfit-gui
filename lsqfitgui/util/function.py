@@ -46,3 +46,21 @@ def parse_function_expression(fit) -> str:
         s = None
 
     return s
+
+
+def document_function(fcn) -> str:
+    """Documents the function."""
+    documentation = []
+    if fcn is None:
+        return None
+
+    if hasattr(fcn, "__name__") and fcn.__name__:
+        documentation.append(f"Name: {fcn.__name__}")
+
+    if hasattr(fcn, "__module__") and fcn.__module__:
+        documentation.append(f"Module: {fcn.__module__}")
+
+    if hasattr(fcn, "__doc__") and fcn.__doc__:
+        documentation.append(f"\n Doc: {fcn.__doc__}")
+
+    return "\n".join(documentation)
