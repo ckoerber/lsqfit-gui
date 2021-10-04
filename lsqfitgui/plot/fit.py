@@ -10,6 +10,27 @@ from lsqfitgui.plot.util import get_fit_bands, get_residuals
 from lsqfitgui.plot.uncertainty import plot_errors, plot_band
 
 
+LOG_MENU = dict(
+    type="dropdown",
+    direction="down",
+    y=1.2,
+    x=0,
+    xanchor="left",
+    buttons=list(
+        [
+            dict(
+                args=[{"yaxis": {"type": "linear"}}],
+                label="Linear Scale",
+                method="relayout",
+            ),
+            dict(
+                args=[{"yaxis": {"type": "log"}}], label="Log Scale", method="relayout",
+            ),
+        ]
+    ),
+)
+
+
 def plot_fit(fit, fig: Optional[Figure] = None):
     """Plot data and fit error bands."""
     x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit)
@@ -47,7 +68,10 @@ def plot_fit(fit, fig: Optional[Figure] = None):
         fig.update_layout(height=len(fit.y) * 300)
 
     fig.update_layout(
-        template="plotly_white", font={"size": 16}, hoverlabel={"font_size": 16},
+        template="plotly_white",
+        font={"size": 16},
+        hoverlabel={"font_size": 16},
+        updatemenus=[LOG_MENU],
     )
     return fig
 
@@ -79,6 +103,9 @@ def plot_residuals(fit, fig: Optional[Figure] = None):
     fig.add_hline(0, line={"color": "black"})
 
     fig.update_layout(
-        template="plotly_white", font={"size": 16}, hoverlabel={"font_size": 16},
+        template="plotly_white",
+        font={"size": 16},
+        hoverlabel={"font_size": 16},
+        # updatemenus=[LOG_MENU],
     )
     return fig
