@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 from gvar import GVar
 
-from dash import html
+from dash import html, dcc
 from dash.dependencies import ALL
 
 import dash_bootstrap_components as dbc
@@ -97,6 +97,18 @@ def get_sidebar(
                 ),
                 id="prior-form",
             ),
+            html.Hr(),
+            html.Div(
+                [
+                    html.Button(
+                        "Save fit",
+                        id="save-fit-btn",
+                        className="btn btn-outline-success",
+                    ),
+                    dcc.Download(id="save-fit"),
+                ],
+                className="text-right",
+            ),
         ],
         style=SIDEBAR_STYLE,
     )
@@ -104,3 +116,7 @@ def get_sidebar(
 
 SIDEBAR_PRIOR_INPUT = ({"type": "prior", "index": ALL}, "value")
 SIDEBAR_META_INPUT = ({"type": "meta", "index": ALL}, "value")
+
+
+SAVE_FIT_INPUT = ("save-fit-btn", "n_clicks")
+SAVE_FIT_OUTPUT = ("save-fit", "data")

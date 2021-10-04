@@ -1,9 +1,12 @@
 """Lsqfit GUI."""
 from typing import Optional, Callable, Dict, List, Any
 
+from tempfile import NamedTemporaryFile
+
+from gvar import dumps
 from lsqfit import nonlinear_fit
 
-from dash import Dash, html
+from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
 
 from lsqfitgui.frontend.dashboard import (
@@ -13,6 +16,8 @@ from lsqfitgui.frontend.dashboard import (
     EXTERNAL_STYLESHEETS,
     DASHBOARD_PRIOR_INPUT,
     DASHBOARD_META_INPUT,
+    SAVE_FIT_INPUT,
+    SAVE_FIT_OUTPUT,
 )
 
 
@@ -54,7 +59,7 @@ class FitGUI:
             use_default_content=self.use_default_content,
             get_additional_content=self.get_additional_content,
         )
-        self._callbacks = [self._fit_callback]
+        self._callbacks = [self._fit_callback, self._save_fit_callback]
 
         self._setup_old = list(self._fit_setup_kwargs.values())
         self._prior_old = None
@@ -103,12 +108,22 @@ class FitGUI:
         Input(*DASHBOARD_META_INPUT),
     ]
 
+    def _save_fit_callback(self, *args, **kwargs):
+        with NamedTemporaryFile() as out:
+            out.write(dumps(self.fit))
+            return dcc.send_file(out.name, filename="fit.p")
+
+    _save_fit_callback.output = Output(*SAVE_FIT_OUTPUT)
+    _save_fit_callback.input = [Input(*SAVE_FIT_INPUT)]
+    _save_fit_callback.kwargs = {"prevent_initial_call": True}
+
     def setup(self, app):
         """Initialize the dash app."""
         app.title = self.name
         app.layout = html.Div(children=self.layout, id="body")
         for callback in self._callbacks:
-            app.callback(callback.output, callback.input)(callback)
+            kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
+            app.callback(callback.output, callback.input, **kwargs)(callback)
 
 
 def run_server(

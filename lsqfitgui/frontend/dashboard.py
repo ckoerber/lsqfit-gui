@@ -10,6 +10,8 @@ from lsqfitgui.frontend.sidebar import (
     SIDEBAR_PRIOR_INPUT,
     SIDEBAR_META_INPUT,
 )
+from lsqfitgui.frontend.sidebar import SAVE_FIT_INPUT, SAVE_FIT_OUTPUT  # noqa
+
 from lsqfitgui.frontend.content import get_content
 from lsqfitgui.backend.sidebar import process_priors, process_meta
 
