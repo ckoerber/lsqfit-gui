@@ -42,7 +42,7 @@ and run
 lsqfitgui [--function other_script.py:fcn] fit.p
 ```
 
-Both commands will spawn a local server to interface.
+Both commands will spawn a local server hosting the lsqfit interface.
 
 ## Advanced configuration
 
