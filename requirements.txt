@@ -2,4 +2,5 @@ lsqfit
 pandas
 sympy
 plotly
-streamlit
+dash
+dash-bootstrap-components

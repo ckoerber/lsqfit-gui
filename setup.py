@@ -26,5 +26,5 @@ setup(
     author=__author__,
     packages=find_packages(exclude=["docs", "tests", "example"]),
     install_requires=REQUIREMENTS,
-    scripts=["lsqfitgui/lsqfitgui"],
+    entry_points={"console_scripts": ["lsqfitgui=lsqfitgui.scripts.entrypoint:main"]},
 )
