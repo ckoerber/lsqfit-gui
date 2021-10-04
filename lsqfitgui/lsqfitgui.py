@@ -24,12 +24,16 @@ class FitGUI:
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
+        use_default_content: Optional[bool] = True,
+        get_additional_content: Optional[html.Base] = None,
     ):
         """Initialize the GUI."""
         self.name = name
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
+        self.use_default_content = use_default_content
+        self.get_additional_content = get_additional_content
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -45,6 +49,8 @@ class FitGUI:
             self.initial_fit,
             meta_config=self._meta_config,
             meta_values=self._fit_setup_kwargs,
+            use_default_content=self.use_default_content,
+            get_additional_content=self.get_additional_content,
         )
         self._callbacks = [self._fit_callback]
 
@@ -65,11 +71,18 @@ class FitGUI:
                 self._fit_setup_function,
                 self._fit_setup_kwargs,
                 meta_config=self._meta_config,
+                use_default_content=self.use_default_content,
+                get_additional_content=self.get_additional_content,
             )
             self._setup_old = setup
         elif prior != self._prior_old:
             self._layout, self._fit = update_layout_from_prior(
-                prior, self.fit, setup=setup, meta_config=self._meta_config,
+                prior,
+                self.fit,
+                setup=setup,
+                meta_config=self._meta_config,
+                use_default_content=self.use_default_content,
+                get_additional_content=self.get_additional_content,
             )
             self._prior_old = prior
 
@@ -103,6 +116,8 @@ def run_server(
     fit_setup_function: Optional[Callable] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
+    use_default_content: Optional[bool] = True,
+    get_additional_content: Optional[html.Base] = None,
     **kwargs
 ):
     """Provide dashboard for lsqfitgui."""
@@ -112,6 +127,8 @@ def run_server(
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
+        use_default_content=use_default_content,
+        get_additional_content=get_additional_content,
     )
     app = Dash(name, external_stylesheets=EXTERNAL_STYLESHEETS)
     renderer.setup(app)

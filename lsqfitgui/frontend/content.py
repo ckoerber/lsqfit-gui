@@ -27,28 +27,20 @@ def get_content(fit, name: str = "Lsqfit GUI"):
             dcc.Tabs(
                 [
                     dcc.Tab(
-                        children=[
-                            html.H2(children="Details"),
-                            html.Pre(children=fit.format(maxline=True)),
-                        ],
-                        label="Details",
-                        value="details",
+                        children=[dcc.Graph(figure=fig_fit)], label="Fit", value="fit",
                     ),
                     dcc.Tab(
-                        children=[html.H2(children="Fit"), dcc.Graph(figure=fig_fit)],
-                        label="Fit",
-                        value="fit",
-                    ),
-                    dcc.Tab(
-                        children=[
-                            html.H2(children="Residuals"),
-                            dcc.Graph(figure=fig_residuals),
-                        ],
+                        children=[dcc.Graph(figure=fig_residuals)],
                         label="Residuals",
                         value="residuals",
                     ),
+                    dcc.Tab(
+                        children=[html.Pre(children=fit.format(maxline=True))],
+                        label="Details",
+                        value="details",
+                    ),
                 ],
-                value="details",
+                value="fit",
                 persistence=True,
                 persistence_type="local",
                 persisted_props=["value"],
