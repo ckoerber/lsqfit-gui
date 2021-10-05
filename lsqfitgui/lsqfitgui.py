@@ -60,6 +60,7 @@ class FitGUI:
 
         self._layout = get_layout(
             self.initial_fit,
+            name=self.name,
             meta_config=self._meta_config,
             meta_values=self._fit_setup_kwargs,
             use_default_content=self.use_default_content,
@@ -83,6 +84,7 @@ class FitGUI:
                 setup,
                 self._fit_setup_function,
                 self._fit_setup_kwargs,
+                name=self.name,
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
@@ -93,6 +95,7 @@ class FitGUI:
                 prior,
                 self.fit,
                 setup=setup,
+                name=self.name,
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
