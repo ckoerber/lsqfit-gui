@@ -1,6 +1,7 @@
 """Lsqfit GUI."""
 from typing import Optional, Callable, Dict, List, Any
 
+import os
 from tempfile import NamedTemporaryFile
 
 from gvar import dumps, evalcorr
@@ -15,6 +16,7 @@ from lsqfitgui.frontend.dashboard import (
     update_layout_from_prior,
     update_layout_from_meta,
     EXTERNAL_STYLESHEETS,
+    EXTERNAL_SCRIPTS,
     DASHBOARD_PRIOR_INPUT,
     DASHBOARD_META_INPUT,
     SAVE_FIT_INPUT,
@@ -156,6 +158,11 @@ def run_server(
         use_default_content=use_default_content,
         get_additional_content=get_additional_content,
     )
-    app = Dash(name, external_stylesheets=EXTERNAL_STYLESHEETS)
+    app = Dash(
+        name,
+        external_stylesheets=EXTERNAL_STYLESHEETS,
+        external_scripts=EXTERNAL_SCRIPTS,
+        assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
+    )
     renderer.setup(app)
     app.run_server(debug=debug)

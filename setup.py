@@ -25,6 +25,7 @@ setup(
     long_description_content_type="text/markdown",
     author=__author__,
     packages=find_packages(exclude=["docs", "tests", "example"]),
+    package_data={"": ["lsqfitgui/assets/*.js"]},
     install_requires=REQUIREMENTS,
     entry_points={"console_scripts": ["lsqfitgui=lsqfitgui.scripts.entrypoint:main"]},
 )

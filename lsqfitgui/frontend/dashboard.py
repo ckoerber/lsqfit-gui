@@ -62,7 +62,15 @@ def get_layout(
     return layout
 
 
-EXTERNAL_STYLESHEETS = [BOOTSTRAP]
+EXTERNAL_STYLESHEETS = [
+    BOOTSTRAP,
+    "https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css",
+]
+MATHJAX_CDN = (
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js"
+    "?config=TeX-MML-AM_CHTML"
+)
+EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
 DASHBOARD_PRIOR_INPUT = SIDEBAR_PRIOR_INPUT
 DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 
