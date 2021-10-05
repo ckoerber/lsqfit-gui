@@ -15,7 +15,7 @@ def get_additional_content(fit):
             html.H2("Comparison against initial synthetic data values"),
             html.P("Synthetic"),
             html.Pre(str(A0)),
-            html.P("Postieror"),
+            html.P("Posterior"),
             html.Pre(str(fit.p)),
         ]
     )
