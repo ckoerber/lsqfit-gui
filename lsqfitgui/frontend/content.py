@@ -15,15 +15,19 @@ def document_function(
     if fcn is None:
         return None
 
-    fcn_name = fcn.__name__ if hasattr(fcn, "__name__") and fcn.__name__ else None
+    fcn_name = (
+        fcn.__qualname__
+        if hasattr(fcn, "__qualname__") and fcn.__qualname__
+        else (fcn.__name__ if hasattr(fcn, "__name__") and fcn.__name__ else None)
+    )
     if fcn_name:
-        fcn_string = "Function: `"
+        fcn_string = "```python\n"
         fcn_string += (
-            fcn.__module__ + "."
+            f"from {fcn.__module__} import "
             if hasattr(fcn, "__module__") and fcn.__module__
             else ""
         )
-        fcn_string += fcn_name + "`"
+        fcn_string += fcn_name + "\n```"
         documentation.append(dcc.Markdown(fcn_string))
 
     if parameters:
