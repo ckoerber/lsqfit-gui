@@ -25,9 +25,6 @@ def generate_data(n_poly: int = 5, n_data: int = 50):
     a0 = gv.gvar(a0, a0 * np.random.uniform(0.1, 0.3, size=n_poly))
     x = np.linspace(0, 2, n_data)
     y = fcn(x, {f"a{n}": val for n, val in enumerate(a0)})
-    y += gv.gvar(
-        np.zeros(n_data), gv.mean(y) * np.random.uniform(0.05, 0.1, size=n_data)
-    )
     for y in gv.bootstrap_iter(y, 2):
         pass
     return (x, y), {f"a{n}": val for n, val in enumerate(a0)}
