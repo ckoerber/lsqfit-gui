@@ -71,7 +71,9 @@ def plot_fit(fit, fig: Optional[Figure] = None):
         template="plotly_white",
         font={"size": 16},
         hoverlabel={"font_size": 16},
-        updatemenus=[LOG_MENU] if len(fit.y) == 1 else None,
+        updatemenus=[LOG_MENU]
+        if not isinstance(fit.y, (dict, gv.BufferDict))
+        else None,
     )
     return fig
 
