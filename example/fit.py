@@ -28,7 +28,12 @@ def generate_data(n_poly: int = 5, n_data: int = 50):
     y += gv.gvar(
         np.zeros(n_data), gv.mean(y) * np.random.uniform(0.05, 0.1, size=n_data)
     )
-    return (x, y)
+    for y in gv.bootstrap_iter(y, 2):
+        pass
+    return (x, y), {f"a{n}": val for n, val in enumerate(a0)}
+
+
+DATA, A0 = generate_data()
 
 
 def generate_prior(n_poly: int = 5):
@@ -38,9 +43,8 @@ def generate_prior(n_poly: int = 5):
 
 def generate_fit(**meta):
     """Generate a fit for specified meta information."""
-    data = generate_data()
     prior = generate_prior(n_poly=meta["n_poly"])
-    fit = lsqfit.nonlinear_fit(data=data, fcn=fcn, prior=prior)
+    fit = lsqfit.nonlinear_fit(data=DATA, fcn=fcn, prior=prior)
     fit.meta = meta
     return fit
 
