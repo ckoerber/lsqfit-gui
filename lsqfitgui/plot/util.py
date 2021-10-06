@@ -14,7 +14,7 @@ def get_fit_bands(fit):
         else:
             x = np.linspace(fit.x.min(), fit.x.max(), 100)
     except Exception:
-        x = np.sort(fit.x)
+        x = fit.x
     y = fit.fcn(x, fit.p)
     m = gv.mean(y)
     s = gv.sdev(y)

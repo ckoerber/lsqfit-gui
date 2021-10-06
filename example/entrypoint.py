@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """Entrypoint for GUI."""
-from fit import generate_fit
+from fit import generate_fit, A0
 
 from dash import html
 
@@ -10,7 +10,15 @@ from lsqfitgui import run_server
 
 def get_additional_content(fit):
     """Generate aditional dash html elements based on a fit object."""
-    return html.Div([html.H2("Posterior"), html.Pre(str(fit.p))])
+    return html.Div(
+        [
+            html.H2("Comparison against initial synthetic data values"),
+            html.P("Synthetic"),
+            html.Pre(str(A0)),
+            html.P("Posterior"),
+            html.Pre(str(fit.p)),
+        ]
+    )
 
 
 def main():

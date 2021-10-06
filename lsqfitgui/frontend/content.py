@@ -1,8 +1,44 @@
 """Submodule providing GUI content."""
+from typing import Optional, Dict, Callable, List
+
 from dash import html, dcc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
-from lsqfitgui.util.function import document_function
+from lsqfitgui.util.function import parse_function_expression
+
+
+def document_function(
+    fcn: Callable, parameters: Optional[Dict] = None
+) -> List[html.Base]:
+    """Documents the function."""
+    documentation = []
+    if fcn is None:
+        return None
+
+    fcn_name = (
+        fcn.__qualname__
+        if hasattr(fcn, "__qualname__") and fcn.__qualname__
+        else (fcn.__name__ if hasattr(fcn, "__name__") and fcn.__name__ else None)
+    )
+    if fcn_name:
+        fcn_string = "```python\n"
+        fcn_string += (
+            f"from {fcn.__module__} import "
+            if hasattr(fcn, "__module__") and fcn.__module__
+            else ""
+        )
+        fcn_string += fcn_name + "\n```"
+        documentation.append(dcc.Markdown(fcn_string))
+
+    if parameters:
+        tex = parse_function_expression(fcn, parameters)
+        if tex:
+            documentation.append(html.P(fr"$${tex}$$"))
+
+    if hasattr(fcn, "__doc__") and fcn.__doc__:
+        documentation.append(html.Pre(fcn.__doc__))
+
+    return documentation
 
 
 def get_content(fit, name: str = "Lsqfit GUI"):
@@ -19,7 +55,7 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                 html.Div(
                     [
                         html.H4("Fit function"),
-                        html.Pre(document_function(fit.fcn)),
+                        html.Div(document_function(fit.fcn, fit.p)),
                         html.H4("Fit parameters"),
                         html.Pre(str(fit)),
                     ],

@@ -2,7 +2,7 @@
 """Setup file for lsqfitgui."""
 
 __author__ = "@ckoerber"
-
+__version__ = "0.0.1"
 
 from os import path
 
@@ -19,12 +19,14 @@ with open(path.join(CWD, "requirements.txt"), encoding="utf-8") as inp:
 
 setup(
     name="lsqfitgui",
+    version=__version__,
     python_requires=">=3.6",
     description="GUI for lsqfits.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     author=__author__,
     packages=find_packages(exclude=["docs", "tests", "example"]),
+    package_data={"": ["lsqfitgui/assets/*.js"]},
     install_requires=REQUIREMENTS,
     entry_points={"console_scripts": ["lsqfitgui=lsqfitgui.scripts.entrypoint:main"]},
 )

@@ -18,6 +18,7 @@ from lsqfitgui.backend.sidebar import process_priors, process_meta
 
 def get_layout(
     fit: nonlinear_fit,
+    name: str = "Lsqfit GUI",
     meta_config: Optional[Dict[str, Any]] = None,
     meta_values: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
@@ -37,7 +38,7 @@ def get_layout(
     sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
     sidebar.className = "sticky-top bg-light p-4"
 
-    content = get_content(fit) if use_default_content else None
+    content = get_content(fit, name=name) if use_default_content else None
     additional_content = get_additional_content(fit) if get_additional_content else None
 
     layout = html.Div(
@@ -61,7 +62,15 @@ def get_layout(
     return layout
 
 
-EXTERNAL_STYLESHEETS = [BOOTSTRAP]
+EXTERNAL_STYLESHEETS = [
+    BOOTSTRAP,
+    "https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css",
+]
+MATHJAX_CDN = (
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js"
+    "?config=TeX-MML-AM_CHTML"
+)
+EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
 DASHBOARD_PRIOR_INPUT = SIDEBAR_PRIOR_INPUT
 DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 
@@ -69,6 +78,7 @@ DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 def update_layout_from_prior(
     prior,
     initial_fit,
+    name: str = "Lsqfit GUI",
     setup: Optional[Dict[str, Any]] = None,
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
@@ -84,6 +94,7 @@ def update_layout_from_prior(
     return (
         get_layout(
             new_fit,
+            name=name,
             meta_config=meta_config,
             meta_values=setup,
             use_default_content=use_default_content,
@@ -97,6 +108,7 @@ def update_layout_from_meta(
     inp,
     fit_setup_function,
     fit_setup_kwargs,
+    name: str = "Lsqfit GUI",
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
@@ -113,6 +125,7 @@ def update_layout_from_meta(
     return (
         get_layout(
             new_fit,
+            name=name,
             meta_config=meta_config,
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,

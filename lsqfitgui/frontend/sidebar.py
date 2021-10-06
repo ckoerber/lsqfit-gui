@@ -68,7 +68,11 @@ def get_sidebar(
             html.H4("Priors"),
             dbc.Form(
                 dbc.Table(
-                    [html.Thead([html.Th("name"), html.Th("mean"), html.Th("sdev")])]
+                    [
+                        html.Thead(
+                            html.Tr([html.Th("name"), html.Th("mean"), html.Th("sdev")])
+                        )
+                    ]
                     + [
                         html.Tbody(
                             html.Tr(
