@@ -2,7 +2,7 @@
 """Setup file for lsqfitgui."""
 
 __author__ = "@ckoerber"
-
+__version__ = "0.0.1"
 
 from os import path
 
@@ -19,6 +19,7 @@ with open(path.join(CWD, "requirements.txt"), encoding="utf-8") as inp:
 
 setup(
     name="lsqfitgui",
+    version=__version__,
     python_requires=">=3.6",
     description="GUI for lsqfits.",
     long_description=LONG_DESCRIPTION,
