@@ -1,5 +1,7 @@
 .ipynb_checkpoints
 *.ipynb
-*test*
 *.egg-info
 __pycache__
+.pytest_cache
+*.p
+*.log

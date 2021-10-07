@@ -52,3 +52,9 @@ The following script spawns the server which generated the above image
 ```bash
 python example/entrypoint.py
 ```
+
+
+## Tests
+
+You need to install dev requirements and add WebDriver support according to [Dash Testing](https://dash.plotly.com/testing).
+Afterwards, `pytest .` executes the tests.
