@@ -2,6 +2,10 @@
 import pytest
 import json
 
+from time import sleep
+
+from selenium.webdriver.common.keys import Keys
+
 from example.fit import generate_fit
 
 from lsqfitgui import run_server
@@ -48,3 +52,23 @@ def test_02_check_forms(dash_duo, poly_fit_app):
         forms.append((idx["type"], idx["name"], element.get_attribute("value")))
 
     assert expected_forms == forms
+
+
+def test_03_update_prior(dash_duo, poly_fit_app):
+    """Checks if updating the prior updates the fit."""
+    dash_duo.start_server(poly_fit_app)
+
+    initial_fit = poly_fit_app.fit_gui.initial_fit
+
+    key = list(initial_fit.prior.keys())[0]
+    value = initial_fit.prior[key].sdev + 1
+    value_str = f"{value:1.2f}"
+
+    # find element by xpath/placeholder is easier than by id because of dict
+    form = dash_duo.driver.find_element_by_xpath(f'//input[@placeholder="{key}-sdev"]')
+    dash_duo.clear_input(form)
+    form.send_keys(value_str)
+    form.send_keys(Keys.RETURN)
+    sleep(1)
+
+    assert poly_fit_app.fit_gui.fit.prior[key].sdev == value
