@@ -4,7 +4,7 @@ from typing import Optional, Callable, Dict, List, Any
 import os
 from tempfile import NamedTemporaryFile
 
-from gvar import dumps, evalcorr, BufferDict
+from gvar import dumps, evalcorr
 from lsqfit import nonlinear_fit
 from numpy import eye, allclose
 
@@ -17,7 +17,8 @@ from lsqfitgui.frontend.dashboard import (
     update_layout_from_meta,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
-    DASHBOARD_PRIOR_INPUT,
+    DASHBOARD_PRIOR_KEYS_INPUT,
+    DASHBOARD_PRIOR_VALUES_INPUT,
     DASHBOARD_META_INPUT,
     SAVE_FIT_INPUT,
     SAVE_FIT_OUTPUT,
@@ -56,7 +57,8 @@ class FitGUI:
             self.initial_fit = fit
 
         if not allclose(
-            evalcorr(self.initial_fit.prior.flatten()), eye(len(self.initial_fit.prior.flatten()))
+            evalcorr(self.initial_fit.prior.flatten()),
+            eye(len(self.initial_fit.prior.flatten())),
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 
@@ -71,7 +73,8 @@ class FitGUI:
         self._callbacks = [self._fit_callback, self._save_fit_callback]
 
         self._setup_old = list(self._fit_setup_kwargs.values())
-        self._prior_old = None
+        self._prior_keys_old = None
+        self._prior_values_old = None
         self._fit = self.initial_fit
 
     @property
@@ -79,7 +82,7 @@ class FitGUI:
         """Return current fit object."""
         return self._fit
 
-    def update_layout(self, prior, setup):
+    def update_layout(self, prior_keys, prior_values, setup):
         """Update the layout given new prior input."""
         if setup != self._setup_old:
             self._layout, self._fit = update_layout_from_meta(
@@ -92,9 +95,11 @@ class FitGUI:
                 get_additional_content=self.get_additional_content,
             )
             self._setup_old = setup
-        elif prior != self._prior_old:
+        elif (
+            prior_keys != self._prior_keys_old or prior_values != self._prior_values_old
+        ):
             self._layout, self._fit = update_layout_from_prior(
-                prior,
+                dict(zip(prior_keys, prior_values)),
                 self.fit,
                 setup=setup,
                 name=self.name,
@@ -102,7 +107,8 @@ class FitGUI:
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
             )
-            self._prior_old = prior
+            self._prior_keys_old = prior_keys
+            self._prior_values_old = prior_values
 
     @property
     def layout(self):
@@ -115,7 +121,8 @@ class FitGUI:
 
     _fit_callback.output = Output("body", "children")
     _fit_callback.input = [
-        Input(*DASHBOARD_PRIOR_INPUT),
+        Input(*DASHBOARD_PRIOR_KEYS_INPUT),
+        Input(*DASHBOARD_PRIOR_VALUES_INPUT),
         Input(*DASHBOARD_META_INPUT),
     ]
 
