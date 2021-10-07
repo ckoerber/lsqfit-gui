@@ -18,7 +18,6 @@ def get_float_widget(
     inp = dbc.Input(
         type="number",
         id={"type": "prior", "index": name},
-        key=name,
         placeholder=name,
         value=str(value),
         className="form-control-sm",
@@ -128,7 +127,7 @@ def get_sidebar(
     )
 
 
-SIDEBAR_PRIOR_KEYS_INPUT = ({"type": "prior", "index": ALL}, "key")
+SIDEBAR_PRIOR_KEYS_INPUT = ({"type": "prior", "index": ALL}, "placeholder")
 SIDEBAR_PRIOR_VALUES_INPUT = ({"type": "prior", "index": ALL}, "value")
 SIDEBAR_META_INPUT = ({"type": "meta", "index": ALL}, "value")
 
