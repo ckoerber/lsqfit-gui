@@ -154,10 +154,11 @@ def run_server(
     meta_config: Optional[List[Dict]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    **kwargs
-):
+    run_app: bool = True,
+    **kwargs,
+) -> Dash:
     """Provide dashboard for lsqfitgui."""
-    renderer = FitGUI(
+    fit_gui = FitGUI(
         fit=fit,
         name=name,
         fit_setup_function=fit_setup_function,
@@ -172,5 +173,8 @@ def run_server(
         external_scripts=EXTERNAL_SCRIPTS,
         assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
     )
-    renderer.setup(app)
-    app.run_server(debug=debug)
+    app.fit_gui = fit_gui
+    fit_gui.setup(app)
+    if run_app:
+        app.run_server(debug=debug)
+    return app
