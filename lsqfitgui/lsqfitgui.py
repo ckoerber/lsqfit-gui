@@ -17,7 +17,7 @@ from lsqfitgui.frontend.dashboard import (
     update_layout_from_meta,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
-    DASHBOARD_PRIOR_KEYS_INPUT,
+    DASHBOARD_PRIOR_IDS_INPUT,
     DASHBOARD_PRIOR_VALUES_INPUT,
     DASHBOARD_META_INPUT,
     SAVE_FIT_INPUT,
@@ -82,8 +82,9 @@ class FitGUI:
         """Return current fit object."""
         return self._fit
 
-    def update_layout(self, prior_keys, prior_values, setup):
+    def update_layout(self, prior_ids, prior_values, setup):
         """Update the layout given new prior input."""
+        prior_keys = [idx["name"] for idx in prior_ids]
         if setup != self._setup_old:
             self._layout, self._fit = update_layout_from_meta(
                 setup,
@@ -121,7 +122,7 @@ class FitGUI:
 
     _fit_callback.output = Output("body", "children")
     _fit_callback.input = [
-        Input(*DASHBOARD_PRIOR_KEYS_INPUT),
+        Input(*DASHBOARD_PRIOR_IDS_INPUT),
         Input(*DASHBOARD_PRIOR_VALUES_INPUT),
         Input(*DASHBOARD_META_INPUT),
     ]
