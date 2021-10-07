@@ -5,6 +5,7 @@ from dash import html, dcc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
 from lsqfitgui.util.function import parse_function_expression
+from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
 
 
 def document_function(
@@ -56,6 +57,7 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                     [
                         html.H4("Fit function"),
                         html.Div(document_function(fit.fcn, fit.p)),
+                        html.Pre(get_entrypoint_string() + "\n" + get_version_string()),
                         html.H4("Fit parameters"),
                         html.Pre(str(fit)),
                     ],

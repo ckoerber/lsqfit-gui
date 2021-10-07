@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Setup file for lsqfitgui."""
+from lsqfitgui.version import __version__
 
 __author__ = "@ckoerber"
-__version__ = "0.0.1"
 
 from os import path
 
