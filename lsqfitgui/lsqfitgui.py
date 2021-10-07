@@ -4,7 +4,7 @@ from typing import Optional, Callable, Dict, List, Any
 import os
 from tempfile import NamedTemporaryFile
 
-from gvar import dumps, evalcorr
+from gvar import dumps, evalcorr, BufferDict
 from lsqfit import nonlinear_fit
 from numpy import eye, allclose
 
@@ -56,7 +56,7 @@ class FitGUI:
             self.initial_fit = fit
 
         if not allclose(
-            evalcorr(self.initial_fit.prior.values()), eye(len(self.initial_fit.prior))
+            evalcorr(self.initial_fit.prior.flatten()), eye(len(self.initial_fit.prior.flatten()))
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 

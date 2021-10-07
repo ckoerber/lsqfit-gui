@@ -6,6 +6,8 @@ from gvar import GVar
 from dash import html, dcc
 from dash.dependencies import ALL
 
+from numpy import concatenate
+
 import dash_bootstrap_components as dbc
 
 SIDEBAR_STYLE = {}
@@ -39,6 +41,7 @@ def get_sidebar(
     meta_config: Optional[Dict] = None,
     meta_values: Optional[Dict] = None,
 ):
+
     """Create sidebar."""
     if meta_config is not None:
         meta_elements = [html.H4("Meta")]
@@ -61,6 +64,13 @@ def get_sidebar(
         meta_elements.append(html.Hr())
     else:
         meta_elements = []
+
+    names = concatenate([
+        [n+' '+str(k) for k in range(len(elements[n]))] if hasattr(elements[n], '__len__') else [n]
+        for n in elements
+    ])
+    gvars = elements.flatten()
+    elements = dict(zip(names, gvars))
 
     return html.Div(
         children=meta_elements
