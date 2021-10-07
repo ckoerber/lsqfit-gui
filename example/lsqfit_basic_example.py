@@ -7,6 +7,8 @@ import lsqfit
 import numpy as np
 import gvar as gv
 
+'''
+# An even more basic example; comment-out the other main() instead
 def main():
     x, y = make_data()              # collect fit data
     p0 = None                       # make larger fits go faster (opt.)
@@ -14,19 +16,38 @@ def main():
     fit = lsqfit.nonlinear_fit(data=(x, y), fcn=fcn, prior=prior, p0=p0)
 
     lsqfitgui.run_server(fit)
+'''
 
-def fcn(x, p):                      # function used to fit x, y data
-    a = p['a']                      # array of a[i]s
-    E = p['E']                      # array of E[i]s
-    return sum(ai * np.exp(-Ei * x) for ai, Ei in zip(a, E))
+def main():
+   lsqfitgui.run_server(
+      fit_setup_function=generate_fit,
+      fit_setup_kwargs={"n_exp": 4},
+      meta_config=[
+         {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
+      ]
+   )
 
-def make_prior(nexp):               # make priors for fit parameters
-    prior = gv.BufferDict()         # any dictionary works
-    prior['a'] = [gv.gvar(0.5, 0.4) for i in range(nexp)]
-    prior['E'] = [gv.gvar(i+1, 0.4) for i in range(nexp)]
-    return prior
+def generate_fit(**meta):
+   """Generate a fit for specified meta information."""
+   x, y = make_data()              # collect fit data
+   p0 = None                       # make larger fits go faster (opt.)
+   prior = make_prior(nexp=meta["n_exp"])
+   fit = lsqfit.nonlinear_fit(data=(x, y), fcn=fcn, prior=prior, p0=p0)
+   fit.meta = meta
+   return fit
 
-def make_data():                     # assemble fit data
+def fcn(x, p):                     # function used to fit x, y data
+   a = p['a']                      # array of a[i]s
+   E = p['E']                      # array of E[i]s
+   return sum(ai * np.exp(-Ei * x) for ai, Ei in zip(a, E))
+
+def make_prior(nexp):              # make priors for fit parameters
+   prior = gv.BufferDict()         # any dictionary works
+   prior['a'] = [gv.gvar(0.5, 0.4) for i in range(nexp)]
+   prior['E'] = [gv.gvar(i+1, 0.4) for i in range(nexp)]
+   return prior
+
+def make_data():                   # assemble fit data
    x = np.array([  5.,   6.,   7.,   8.,   9.,  10.,  12.,  14.])
    ymean = np.array(
        [  4.5022829417e-03,   1.8170543788e-03,   7.3618847843e-04,
