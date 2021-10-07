@@ -1,36 +1,32 @@
+"""Functions for parsing sidebar form values into python objects."""
+import re
 import gvar as gv
-import numpy as np
 from lsqfit import nonlinear_fit
 
 
-def process_priors(prior_values, initial_fit):
-    
-    prior_values = (
-        np.array(prior_values, dtype=float).reshape(len(prior_values) // 2, 2).T
-    )
-    if any(prior_values[1] <= 0):
+def process_priors(prior_flat, initial_fit):
+    """Process prior input array into fit object."""
+    if any(
+        [float(val) <= 0 for key, val in prior_flat.items() if key.endswith("sdev")]
+    ):
         raise ValueError("Standard deviations must be larger than zero.")
 
-    flattened_prior_keys = np.concatenate(
-        [np.repeat(key, len(initial_fit.prior[key])) if hasattr(initial_fit.prior[key], '__len__') else [key]
-        for key in initial_fit.prior
-    ])
-
     prior = {}
-    for j, key in enumerate(flattened_prior_keys):
-        if key in prior and hasattr(initial_fit.prior[key], '__len__'):
-            prior[key] = np.append(prior[key], gv.gvar(prior_values[0][j], prior_values[1][j]))
-        elif hasattr(initial_fit.prior[key], '__len__'):
-            prior[key] = np.array([gv.gvar(prior_values[0][j], prior_values[1][j])])
+    for key, val in initial_fit.prior.items():
+        if hasattr(val, "__len__"):
+            nmax = len(
+                [k for k in prior_flat if re.match(f"{key}__array_[0-9]+-mean", k)]
+            )
+            prior[key] = gv.gvar(
+                [prior_flat[f"{key}__array_{n}-mean"] for n in range(nmax)],
+                [prior_flat[f"{key}__array_{n}-sdev"] for n in range(nmax)],
+            )
         else:
-            prior[key] = gv.gvar(prior_values[0][j], prior_values[1][j])
-
-    prior = gv.BufferDict(prior)
+            prior[key] = gv.gvar(prior_flat[f"{key}-mean"], prior_flat[f"{key}-sdev"])
 
     return nonlinear_fit(initial_fit.data, initial_fit.fcn, prior)
 
 
 def process_meta(meta_array, meta_config):
-    """
-    """
+    """Parse meta form input into dictionary shape using meta config name values."""
     return {config["name"]: val for config, val in zip(meta_config, meta_array)}
