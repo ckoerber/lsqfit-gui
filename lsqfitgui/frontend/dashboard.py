@@ -7,7 +7,8 @@ from lsqfit import nonlinear_fit
 
 from lsqfitgui.frontend.sidebar import (
     get_sidebar,
-    SIDEBAR_PRIOR_INPUT,
+    SIDEBAR_PRIOR_IDS_INPUT,
+    SIDEBAR_PRIOR_VALUES_INPUT,
     SIDEBAR_META_INPUT,
 )
 from lsqfitgui.frontend.sidebar import SAVE_FIT_INPUT, SAVE_FIT_OUTPUT  # noqa
@@ -71,7 +72,8 @@ MATHJAX_CDN = (
     "?config=TeX-MML-AM_CHTML"
 )
 EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
-DASHBOARD_PRIOR_INPUT = SIDEBAR_PRIOR_INPUT
+DASHBOARD_PRIOR_IDS_INPUT = SIDEBAR_PRIOR_IDS_INPUT
+DASHBOARD_PRIOR_VALUES_INPUT = SIDEBAR_PRIOR_VALUES_INPUT
 DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
 
 

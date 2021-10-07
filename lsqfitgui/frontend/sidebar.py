@@ -17,7 +17,7 @@ def get_float_widget(
     """Create form group for float input."""
     inp = dbc.Input(
         type="number",
-        id={"type": "prior", "index": name},
+        id={"type": "prior", "name": name},
         placeholder=name,
         value=str(value),
         className="form-control-sm",
@@ -47,7 +47,7 @@ def get_sidebar(
             name = config.pop("name")
             config["debounce"] = True
             config["className"] = "form-control-sm"
-            config["id"] = {"type": "meta", "index": name}
+            config["id"] = {"type": "meta", "name": name}
             config["value"] = meta_values[name]
             meta_elements.append(
                 dbc.FormGroup(
@@ -62,6 +62,36 @@ def get_sidebar(
     else:
         meta_elements = []
 
+    table_rows = []
+    for key, val in elements.items():
+        if hasattr(val, "__len__"):
+            table_rows.append(html.Tr([html.Td(html.B(key))]))
+            for n, dist in enumerate(val):
+                name = f"{key}__array_{n}"
+                row_content = [
+                    html.Td(
+                        dbc.Label(html.Small(n), html_for=f"input-prior-{name}"),
+                        className="pl-4",
+                    ),
+                    html.Td(
+                        get_float_widget(f"{name}-mean", dist.mean, input_only=True)
+                    ),
+                    html.Td(
+                        get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)
+                    ),
+                ]
+                table_rows.append(html.Tr(row_content))
+
+        else:
+            name = key
+            dist = val
+            row_content = [
+                html.Td(dbc.Label(name, html_for=f"input-prior-{name}")),
+                html.Td(get_float_widget(f"{name}-mean", dist.mean, input_only=True)),
+                html.Td(get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)),
+            ]
+            table_rows.append(html.Tr(row_content))
+
     return html.Div(
         children=meta_elements
         + [
@@ -71,29 +101,8 @@ def get_sidebar(
                     [
                         html.Thead(
                             html.Tr([html.Th("name"), html.Th("mean"), html.Th("sdev")])
-                        )
-                    ]
-                    + [
-                        html.Tbody(
-                            html.Tr(
-                                [
-                                    html.Td(
-                                        dbc.Label(name, html_for=f"input-prior-{name}")
-                                    ),
-                                    html.Td(
-                                        get_float_widget(
-                                            f"{name}-mean", dist.mean, input_only=True
-                                        )
-                                    ),
-                                    html.Td(
-                                        get_float_widget(
-                                            f"{name}-sdev", dist.sdev, input_only=True
-                                        )
-                                    ),
-                                ]
-                            )
-                        )
-                        for name, dist in elements.items()
+                        ),
+                        html.Tbody(table_rows),
                     ],
                     borderless=True,
                     responsive=False,
@@ -118,9 +127,9 @@ def get_sidebar(
     )
 
 
-SIDEBAR_PRIOR_INPUT = ({"type": "prior", "index": ALL}, "value")
-SIDEBAR_META_INPUT = ({"type": "meta", "index": ALL}, "value")
-
+SIDEBAR_PRIOR_IDS_INPUT = ({"type": "prior", "name": ALL}, "id")
+SIDEBAR_PRIOR_VALUES_INPUT = ({"type": "prior", "name": ALL}, "value")
+SIDEBAR_META_INPUT = ({"type": "meta", "name": ALL}, "value")
 
 SAVE_FIT_INPUT = ("save-fit-btn", "n_clicks")
 SAVE_FIT_OUTPUT = ("save-fit", "data")
