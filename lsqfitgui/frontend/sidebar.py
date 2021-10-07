@@ -46,6 +46,7 @@ def get_sidebar(
             config = config.copy()
             name = config.pop("name")
             config["debounce"] = True
+            config["placeholder"] = name
             config["className"] = "form-control-sm"
             config["id"] = {"type": "meta", "name": name}
             config["value"] = meta_values[name]

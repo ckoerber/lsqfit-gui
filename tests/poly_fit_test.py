@@ -5,6 +5,9 @@ import json
 from time import sleep
 
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from example.fit import generate_fit
 
@@ -69,6 +72,28 @@ def test_03_update_prior(dash_duo, poly_fit_app):
     dash_duo.clear_input(form)
     form.send_keys(value_str)
     form.send_keys(Keys.RETURN)
+    # There is proably a better way for doing this...
     sleep(1)
 
     assert poly_fit_app.fit_gui.fit.prior[key].sdev == value
+
+
+def test_05_update_meta(dash_duo, poly_fit_app):
+    """Checks if updating the meta updates the fit."""
+    dash_duo.start_server(poly_fit_app)
+
+    n_poly_new = 5
+
+    # find element by xpath/placeholder is easier than by id because of dict
+    form = dash_duo.driver.find_element_by_xpath('//input[@placeholder="n_poly"]')
+    dash_duo.clear_input(form)
+    form.send_keys(str(n_poly_new))
+    form.send_keys(Keys.RETURN)
+
+    WebDriverWait(dash_duo.driver, 2).until(
+        EC.presence_of_element_located(
+            (By.XPATH, f'//input[@placeholder="a{n_poly_new-1}-mean"]')
+        )
+    )
+
+    assert len(poly_fit_app.fit_gui.fit.prior) == n_poly_new
