@@ -21,6 +21,7 @@ from lsqfitgui.frontend.sidebar import (  # noqa
 )
 
 from lsqfitgui.frontend.content import get_content
+from lsqfitgui.frontend.content import FCN_SOURCE_CALLBACK  # noqa
 from lsqfitgui.backend.sidebar import process_priors, process_meta
 
 
@@ -78,6 +79,8 @@ MATHJAX_CDN = (
     "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js"
     "?config=TeX-MML-AM_CHTML"
 )
+
+
 EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
 
 UPDATE_LAYOUT_CALLBACK_ARGS = (
