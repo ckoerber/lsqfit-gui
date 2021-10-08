@@ -1,9 +1,10 @@
 """Widget for exporting priors."""
 from typing import Dict
 
+import json
+
 from numpy import ndarray
 from gvar import GVar, gdumps, BufferDict
-import json
 
 from dash import html
 from dash.dependencies import Input, Output, State
@@ -27,6 +28,10 @@ class GVarEncoder(json.JSONEncoder):
 
 def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
     """Create a modal which contains copyable strings for exporting the prior."""
+    prior = dict(**prior)
+    prior_json = json.dumps(prior, indent=4, cls=GVarEncoder)
+    prior_gdumps = gdumps(prior, method="json")
+    prior_yaml = "Not implemented yet..."
     modal = html.Span(
         [
             html.Button(
@@ -39,13 +44,29 @@ def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
                 [
                     dbc.ModalHeader("Export the prior"),
                     dbc.ModalBody(
-                        html.Pre(
-                            html.Code(
-                                "prior = "
-                                + json.dumps(prior, indent=4, cls=GVarEncoder)
-                            ),
-                            className="bg-light p-4",
-                        ),
+                        dbc.Tabs(
+                            [
+                                dbc.Tab(
+                                    html.Pre(
+                                        html.Code(prior_json), className="bg-light p-4",
+                                    ),
+                                    label="json",
+                                ),
+                                dbc.Tab(
+                                    html.Pre(
+                                        html.Code(prior_gdumps),
+                                        className="bg-light p-4",
+                                    ),
+                                    label="gdumps",
+                                ),
+                                dbc.Tab(
+                                    html.Pre(
+                                        html.Code(prior_yaml), className="bg-light p-4",
+                                    ),
+                                    label="yaml",
+                                ),
+                            ]
+                        )
                     ),
                     dbc.ModalFooter(
                         dbc.Button(
@@ -58,6 +79,7 @@ def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
                 ],
                 id="prior-modal",
                 is_open=False,
+                size="lg",
             ),
         ]
     )
