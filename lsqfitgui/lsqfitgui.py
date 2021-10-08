@@ -9,19 +9,17 @@ from lsqfit import nonlinear_fit
 from numpy import eye, allclose
 
 from dash import Dash, html, dcc
-from dash.dependencies import Input, Output
 
 from lsqfitgui.frontend.dashboard import (
     get_layout,
     update_layout_from_prior,
     update_layout_from_meta,
+    toggle_prior_widget,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
-    DASHBOARD_PRIOR_IDS_INPUT,
-    DASHBOARD_PRIOR_VALUES_INPUT,
-    DASHBOARD_META_INPUT,
-    SAVE_FIT_INPUT,
-    SAVE_FIT_OUTPUT,
+    UPDATE_LAYOUT_CALLBACK_ARGS,
+    SAVE_FIT_CALLBACK_ARGS,
+    EXPORT_PRIOR_CALLBACK_ARGS,
 )
 
 
@@ -70,7 +68,11 @@ class FitGUI:
             use_default_content=self.use_default_content,
             get_additional_content=self.get_additional_content,
         )
-        self._callbacks = [self._fit_callback, self._save_fit_callback]
+        self._callbacks = [
+            self._update_layout_callback,
+            self._save_fit_callback,
+            self._export_prior_callback,
+        ]
 
         self._setup_old = list(self._fit_setup_kwargs.values())
         self._prior_keys_old = None
@@ -82,7 +84,22 @@ class FitGUI:
         """Return current fit object."""
         return self._fit
 
-    def update_layout(self, prior_ids, prior_values, setup):
+    @property
+    def layout(self):
+        """Return the current layout."""
+        return self._layout
+
+    def setup(self, app):
+        """Initialize the dash app."""
+        app.title = self.name
+        app.layout = html.Div(children=self.layout, id="body")
+        for callback in self._callbacks:
+            kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
+            app.callback(*callback.args, **kwargs)(callback)
+
+    # Callbacks
+
+    def _update_layout_callback(self, prior_ids, prior_values, setup):
         """Update the layout given new prior input."""
         prior_keys = [idx["name"] for idx in prior_ids]
         if setup != self._setup_old:
@@ -110,39 +127,26 @@ class FitGUI:
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
-
-    @property
-    def layout(self):
-        """Return the current layout."""
-        return self._layout
-
-    def _fit_callback(self, *args, **kwargs):
-        self.update_layout(*args, **kwargs)
         return self.layout
 
-    _fit_callback.output = Output("body", "children")
-    _fit_callback.input = [
-        Input(*DASHBOARD_PRIOR_IDS_INPUT),
-        Input(*DASHBOARD_PRIOR_VALUES_INPUT),
-        Input(*DASHBOARD_META_INPUT),
-    ]
+    _update_layout_callback.args = UPDATE_LAYOUT_CALLBACK_ARGS
+    _update_layout_callback.kwargs = {"prevent_initial_call": True}
 
     def _save_fit_callback(self, *args, **kwargs):
         with NamedTemporaryFile() as out:
             out.write(dumps(self.fit))
             return dcc.send_file(out.name, filename="fit.p")
 
-    _save_fit_callback.output = Output(*SAVE_FIT_OUTPUT)
-    _save_fit_callback.input = [Input(*SAVE_FIT_INPUT)]
+    _save_fit_callback.args = SAVE_FIT_CALLBACK_ARGS
     _save_fit_callback.kwargs = {"prevent_initial_call": True}
 
-    def setup(self, app):
-        """Initialize the dash app."""
-        app.title = self.name
-        app.layout = html.Div(children=self.layout, id="body")
-        for callback in self._callbacks:
-            kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
-            app.callback(callback.output, callback.input, **kwargs)(callback)
+    def _export_prior_callback(self, *args, **kwargs):
+        """
+        """
+        return toggle_prior_widget(*args, **kwargs)
+
+    _export_prior_callback.args = EXPORT_PRIOR_CALLBACK_ARGS
+    _export_prior_callback.kwargs = {"prevent_initial_call": True}
 
 
 def run_server(

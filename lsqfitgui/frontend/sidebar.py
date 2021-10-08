@@ -4,9 +4,15 @@ from typing import Dict, Optional
 from gvar import GVar
 
 from dash import html, dcc
-from dash.dependencies import ALL
+from dash.dependencies import ALL, Input, Output
 
 import dash_bootstrap_components as dbc
+
+from lsqfitgui.frontend.widgets.export_prior import (  # noqa
+    get_export_prior_widget,
+    EXPORT_PRIOR_CALLBACK_ARGS,
+    toggle_prior_widget,
+)
 
 SIDEBAR_STYLE = {}
 
@@ -114,12 +120,18 @@ def get_sidebar(
             html.Hr(),
             html.Div(
                 [
-                    html.Button(
-                        "Save fit",
-                        id="save-fit-btn",
-                        className="btn btn-outline-success",
+                    get_export_prior_widget(elements),
+                    html.Span(
+                        [
+                            html.Button(
+                                "Save fit",
+                                id="save-fit-btn",
+                                className="btn btn-outline-success",
+                            ),
+                            dcc.Download(id="save-fit"),
+                        ],
+                        className="ml-2",
                     ),
-                    dcc.Download(id="save-fit"),
                 ],
                 className="text-right",
             ),
@@ -132,5 +144,7 @@ SIDEBAR_PRIOR_IDS_INPUT = ({"type": "prior", "name": ALL}, "id")
 SIDEBAR_PRIOR_VALUES_INPUT = ({"type": "prior", "name": ALL}, "value")
 SIDEBAR_META_INPUT = ({"type": "meta", "name": ALL}, "value")
 
-SAVE_FIT_INPUT = ("save-fit-btn", "n_clicks")
-SAVE_FIT_OUTPUT = ("save-fit", "data")
+SAVE_FIT_CALLBACK_ARGS = (
+    Output("save-fit", "data"),
+    [Input("save-fit-btn", "n_clicks")],
+)
