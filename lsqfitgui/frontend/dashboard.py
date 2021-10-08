@@ -1,6 +1,9 @@
 """Provides dashboard for lsqfitgui."""
 from typing import Optional, Dict, Any, Callable
+
 from dash import html
+from dash.dependencies import Input, Output
+
 from dash_bootstrap_components.themes import BOOTSTRAP
 
 from lsqfit import nonlinear_fit
@@ -11,7 +14,11 @@ from lsqfitgui.frontend.sidebar import (
     SIDEBAR_PRIOR_VALUES_INPUT,
     SIDEBAR_META_INPUT,
 )
-from lsqfitgui.frontend.sidebar import SAVE_FIT_INPUT, SAVE_FIT_OUTPUT  # noqa
+from lsqfitgui.frontend.sidebar import (  # noqa
+    SAVE_FIT_CALLBACK_ARGS,
+    EXPORT_PRIOR_CALLBACK_ARGS,
+    toggle_prior_widget,
+)
 
 from lsqfitgui.frontend.content import get_content
 from lsqfitgui.backend.sidebar import process_priors, process_meta
@@ -72,9 +79,15 @@ MATHJAX_CDN = (
     "?config=TeX-MML-AM_CHTML"
 )
 EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
-DASHBOARD_PRIOR_IDS_INPUT = SIDEBAR_PRIOR_IDS_INPUT
-DASHBOARD_PRIOR_VALUES_INPUT = SIDEBAR_PRIOR_VALUES_INPUT
-DASHBOARD_META_INPUT = SIDEBAR_META_INPUT
+
+UPDATE_LAYOUT_CALLBACK_ARGS = (
+    Output("body", "children"),
+    [
+        Input(*SIDEBAR_PRIOR_IDS_INPUT),
+        Input(*SIDEBAR_PRIOR_VALUES_INPUT),
+        Input(*SIDEBAR_META_INPUT),
+    ],
+)
 
 
 def update_layout_from_prior(
