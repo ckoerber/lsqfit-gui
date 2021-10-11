@@ -13,7 +13,9 @@ from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
 
 
 def document_function(
-    fcn: Callable, parameters: Optional[Dict] = None
+    fcn: Callable,
+    parameters: Optional[Dict] = None,
+    x_dict_keys: Optional[List[str]] = None,
 ) -> List[html.Base]:
     """Documents the function."""
     documentation = []
@@ -40,7 +42,7 @@ def document_function(
     )
 
     if parameters:
-        tex = parse_function_expression(fcn, parameters)
+        tex = parse_function_expression(fcn, parameters, x_dict_keys=x_dict_keys)
         if tex:
             documentation.append(html.P(fr"$${tex}$$"))
 
@@ -101,7 +103,15 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                 html.Div(
                     [
                         html.H4("Fit function"),
-                        html.Div(document_function(fit.fcn, fit.p)),
+                        html.Div(
+                            document_function(
+                                fit.fcn,
+                                fit.p,
+                                x_dict_keys=list(fit.x.keys())
+                                if isinstance(fit.x, dict)
+                                else None,
+                            )
+                        ),
                         html.H4("Fit parameters"),
                         html.Pre(str(fit)),
                     ],
