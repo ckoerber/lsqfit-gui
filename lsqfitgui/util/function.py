@@ -1,5 +1,5 @@
 """Utilities for parsing and importing functions."""
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional, List
 
 import re
 import importlib.util
@@ -20,7 +20,9 @@ def parse_function(string: str):
     return getattr(module, name)
 
 
-def parse_function_expression(fcn: Callable, parameters: Dict) -> str:
+def parse_function_expression(
+    fcn: Callable, parameters: Dict, x_dict_keys: Optional[List[str]] = None
+) -> str:
     """Parse the fit function and posteriror to latex label."""
     expressions = {}
     for key, val in parameters.items():
@@ -32,10 +34,26 @@ def parse_function_expression(fcn: Callable, parameters: Dict) -> str:
         expressions[key] = expr
 
     try:
-        f_expr = fcn(
-            x=sympy.Symbol("x"), p={key: expr for key, expr in expressions.items()}
+        xx = (
+            sympy.Symbol("x")
+            if x_dict_keys is None
+            else {key: sympy.Symbol("x") for key in x_dict_keys}
         )
-        s = sympy.latex(f_expr)
+        f_expr = fcn(x=xx, p=expressions)
+        s = (
+            "\\begin{aligned}\n"
+            + (
+                r" \\ ".join(
+                    [
+                        sympy.latex(sympy.Symbol(key)) + " &= " + sympy.latex(val)
+                        for key, val in f_expr.items()
+                    ]
+                )
+                if isinstance(f_expr, dict)
+                else sympy.latex(f_expr)
+            )
+            + "\n\\end{aligned}\n"
+        )
         s = re.sub(r"\+\s+\-", "-", s)
     except Exception:
         s = None

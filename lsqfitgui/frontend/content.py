@@ -1,7 +1,11 @@
 """Submodule providing GUI content."""
 from typing import Optional, Dict, Callable, List
 
+from inspect import getsource
+
 from dash import html, dcc
+from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
 from lsqfitgui.util.function import parse_function_expression
@@ -9,7 +13,9 @@ from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
 
 
 def document_function(
-    fcn: Callable, parameters: Optional[Dict] = None
+    fcn: Callable,
+    parameters: Optional[Dict] = None,
+    x_dict_keys: Optional[List[str]] = None,
 ) -> List[html.Base]:
     """Documents the function."""
     documentation = []
@@ -31,15 +37,56 @@ def document_function(
         fcn_string += fcn_name + "\n```"
         documentation.append(dcc.Markdown(fcn_string))
 
+    documentation.append(
+        html.Pre(get_entrypoint_string() + "\n" + get_version_string())
+    )
+
     if parameters:
-        tex = parse_function_expression(fcn, parameters)
+        tex = parse_function_expression(fcn, parameters, x_dict_keys=x_dict_keys)
         if tex:
             documentation.append(html.P(fr"$${tex}$$"))
 
     if hasattr(fcn, "__doc__") and fcn.__doc__:
-        documentation.append(html.Pre(fcn.__doc__))
+        documentation.append(html.Pre(html.Code(fcn.__doc__)))
+
+    source = getsource(fcn)
+    documentation.append(
+        html.Div(
+            [
+                html.Button(
+                    "Show source code",
+                    className="btn btn-outline-primary btn-small",
+                    id="collapse-function-source-button",
+                    n_clicks=0,
+                ),
+                dbc.Collapse(
+                    dbc.Card(
+                        dbc.CardBody(
+                            dcc.Markdown(f"```python\n{source}\n```"), className="p-4",
+                        ),
+                    ),
+                    id="collapse-function-source",
+                    is_open=False,
+                ),
+            ],
+            className="py-4",
+        )
+    )
 
     return documentation
+
+
+def toggle_function_source_collapse(n, is_open):
+    """Toggles the source code of the function."""
+    return not is_open if n else is_open
+
+
+FCN_SOURCE_CALLBACK = toggle_function_source_collapse
+FCN_SOURCE_CALLBACK.args = (
+    Output("collapse-function-source", "is_open"),
+    [Input("collapse-function-source-button", "n_clicks")],
+    [State("collapse-function-source", "is_open")],
+)
 
 
 def get_content(fit, name: str = "Lsqfit GUI"):
@@ -56,8 +103,15 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                 html.Div(
                     [
                         html.H4("Fit function"),
-                        html.Div(document_function(fit.fcn, fit.p)),
-                        html.Pre(get_entrypoint_string() + "\n" + get_version_string()),
+                        html.Div(
+                            document_function(
+                                fit.fcn,
+                                fit.p,
+                                x_dict_keys=list(fit.x.keys())
+                                if isinstance(fit.x, dict)
+                                else None,
+                            )
+                        ),
                         html.H4("Fit parameters"),
                         html.Pre(str(fit)),
                     ],

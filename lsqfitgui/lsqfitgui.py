@@ -20,6 +20,7 @@ from lsqfitgui.frontend.dashboard import (
     UPDATE_LAYOUT_CALLBACK_ARGS,
     SAVE_FIT_CALLBACK_ARGS,
     EXPORT_PRIOR_CALLBACK_ARGS,
+    FCN_SOURCE_CALLBACK,
 )
 
 
@@ -72,6 +73,7 @@ class FitGUI:
             self._update_layout_callback,
             self._save_fit_callback,
             self._export_prior_callback,
+            FCN_SOURCE_CALLBACK,
         ]
 
         self._setup_old = list(self._fit_setup_kwargs.values())
