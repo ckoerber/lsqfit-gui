@@ -34,9 +34,14 @@ def fitfcn(x, p):
     return {key: p["a"] + p[f"s{key[1:]}"] * x[key] for key in x}
 
 
+def get_fit():
+    """Return fit object."""
+    return lsqfit.nonlinear_fit(data=(XX, YY), fcn=fitfcn, prior=PRIOR)
+
+
 def main():
     """Run lsqfitgui server for multi-linear fit."""
-    run_server(lsqfit.nonlinear_fit(data=(XX, YY), fcn=fitfcn, prior=PRIOR))
+    run_server(get_fit())
 
 
 if __name__ == "__main__":
