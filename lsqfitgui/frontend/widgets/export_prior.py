@@ -2,6 +2,7 @@
 from typing import Dict
 
 import json
+import yaml
 
 from numpy import ndarray
 from gvar import GVar, gdumps, BufferDict
@@ -26,12 +27,33 @@ class GVarEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True):
+    """Convert prior to yaml string.
+
+    Can be loaded in by
+    ```python
+    prior = {key: gv.gvar(val) for key, val in yaml_loaded.items()}
+    ```
+
+    See also https://github.com/ckoerber/lsqfit-gui/issues/2#issuecomment-939055226
+    """
+    cast_yaml_type = str if gv_as_string else lambda el: (el.mean, el.sdev)
+
+    output = {}
+    for key, val in gv_dict.items():
+        if hasattr(gv_dict[key], "__len__"):
+            output[key] = [cast_yaml_type(g) for g in val]
+        else:
+            output[key] = cast_yaml_type(val)
+    return yaml.dumps(output, default_flow_style=None, sort_keys=False)
+
+
 def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
     """Create a modal which contains copyable strings for exporting the prior."""
     prior = dict(**prior)
     prior_json = json.dumps(prior, indent=4, cls=GVarEncoder)
     prior_gdumps = gdumps(prior, method="json")
-    prior_yaml = "Not implemented yet..."
+    prior_yaml = gv_dict_to_yaml(prior)
     modal = html.Span(
         [
             html.Button(
