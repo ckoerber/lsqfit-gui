@@ -27,7 +27,7 @@ class GVarEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True):
+def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True, **kwargs):
     """Convert prior to yaml string.
 
     Can be loaded in by
@@ -45,7 +45,7 @@ def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True):
             output[key] = [cast_yaml_type(g) for g in val]
         else:
             output[key] = cast_yaml_type(val)
-    return yaml.dumps(output, default_flow_style=None, sort_keys=False)
+    return yaml.dump(output, **kwargs)
 
 
 def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
@@ -53,7 +53,7 @@ def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
     prior = dict(**prior)
     prior_json = json.dumps(prior, indent=4, cls=GVarEncoder)
     prior_gdumps = gdumps(prior, method="json")
-    prior_yaml = gv_dict_to_yaml(prior)
+    prior_yaml = gv_dict_to_yaml(prior, indent=4)
     modal = html.Span(
         [
             html.Button(
