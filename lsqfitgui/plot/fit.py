@@ -56,7 +56,7 @@ def plot_fit(fit, fig: Optional[Figure] = None):
             )
             plot_band(
                 fig,
-                x_fit if isinstance(x_fit, dict) else x_fit,
+                x_fit[key] if isinstance(x_fit, dict) else x_fit,
                 y_min_fit[key],
                 y_mean_fit[key],
                 y_max_fit[key],
