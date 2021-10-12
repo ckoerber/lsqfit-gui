@@ -28,7 +28,7 @@ from lsqfitgui.frontend.dashboard import (
 class FitGUI:
     """Class which initializes the dashboard."""
 
-    _fcns_plots = {}
+    plot_fcns = {}
 
     def __init__(
         self,
@@ -71,7 +71,7 @@ class FitGUI:
             meta_values=self._fit_setup_kwargs,
             use_default_content=self.use_default_content,
             get_additional_content=self.get_additional_content,
-            fcns=FitGUI._fcns_plots
+            fcns=FitGUI.plot_fcns
         )
         self._callbacks = [
             self._update_layout_callback,
@@ -117,6 +117,7 @@ class FitGUI:
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
+                fcns=FitGUI.plot_fcns
             )
             self._setup_old = setup
         elif (
@@ -130,6 +131,7 @@ class FitGUI:
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
+                fcns=FitGUI.plot_fcns
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
@@ -195,7 +197,7 @@ def plot(fcn):
     def wrapper(*args, **kwargs):
         return fcn(*args, **kwargs)
 
-    FitGUI._fcns_plots[fcn.__name__] = fcn
+    FitGUI.plot_fcns[fcn.__name__] = fcn
  
     #setattr(FitGUI._plot_fcns, fcn.__name__, wrapper)
     return functools

@@ -89,7 +89,7 @@ FCN_SOURCE_CALLBACK.args = (
 )
 
 
-def get_content(fit, name: str = "Lsqfit GUI", fcns = {}): # add type hint later
+def get_content(fit, name: str = "Lsqfit GUI", fcns: Optional[Dict[str, Callable]] = None): 
     """Create default content block for fit object.
 
     This includes the plots for the data, residuals and details.

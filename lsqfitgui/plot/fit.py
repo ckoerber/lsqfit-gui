@@ -1,5 +1,5 @@
 """Plotting routines associated with fit objects."""
-from typing import Optional
+from typing import Callable, Optional
 
 import gvar as gv
 
@@ -31,7 +31,7 @@ LOG_MENU = dict(
 )
 
 
-def plot_fit(fit, fig: Optional[Figure] = None, fcn = None): # add type hint
+def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None): 
     """Plot data and fit error bands."""
     x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit, fcn=fcn)
 

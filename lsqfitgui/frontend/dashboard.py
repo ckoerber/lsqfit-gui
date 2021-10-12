@@ -102,6 +102,7 @@ def update_layout_from_prior(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
+    fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ):
     """Parse prior form input values to create new layout.
@@ -118,6 +119,7 @@ def update_layout_from_prior(
             meta_values=setup,
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
+            fcns=fcns
         ),
         new_fit,
     )
@@ -131,6 +133,7 @@ def update_layout_from_meta(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
+    fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ):
     """Parse meta form input values to create new layout.
@@ -149,6 +152,7 @@ def update_layout_from_meta(
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
             meta_values=setup,
+            fcns=fcns
         ),
         new_fit,
     )
