@@ -31,15 +31,25 @@ LOG_MENU = dict(
 )
 
 
-def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None): 
+def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None, y = None): # add type hint
     """Plot data and fit error bands."""
     x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit, fcn=fcn)
 
     if not isinstance(fit.y, (dict, gv.BufferDict)):
         fig = fig or Figure()
-        if fcn is None:
+
+        if y is None and fcn is None:
             plot_errors(fig, fit.x, gv.mean(fit.y), gv.sdev(fit.y), name="Data")
-        plot_band(fig, x_fit, y_min_fit, y_mean_fit, y_max_fit, name="Fit")
+        elif y is not None:
+            plot_errors(fig, fit.x, gv.mean(y), gv.sdev(y), name="Data")
+
+        if (
+            (fcn is not None) # fcn specified => show plot fcn
+            or (y is None) # y is None => using fit.y => show fit; 
+            or (y == fit.y).all() # y=fit.y as an argument => show fit
+        ):
+            plot_band(fig, x_fit, y_min_fit, y_mean_fit, y_max_fit, name="Fit")
+
     else:
         fig = fig or make_subplots(
             cols=1, rows=len(fit.y), subplot_titles=list(fit.y.keys())

@@ -19,13 +19,21 @@ def main():
 '''
 
 def main():
+
+   x , y = make_data()
+   y_eff_mass = np.array([])
+   dx = np.roll(x, -1) - x
+   y_eff_mass = np.log(y/np.roll(y, -1))/dx
+   y_eff_wf = np.exp(y_eff_mass *x)*y
+
    lsqfitgui.run_server(
       fit_setup_function=generate_fit,
       fit_setup_kwargs={"n_exp": 4},
       meta_config=[
          {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
       ], 
-      #plot_fcns={'eff_mass' : eff_mass}
+      plot_fcns={'eff_mass' : eff_mass}, #, 'eff_wf' :eff_wf},
+      transformed_y={'eff_mass' : y_eff_mass, 'eff_wf' : y_eff_wf}
    )
 
 def generate_fit(**meta):
@@ -42,11 +50,11 @@ def fcn(x, p):                     # function used to fit x, y data
    E = p['E']                      # array of E[i]s
    return np.array(sum(ai * np.exp(-Ei * x) for ai, Ei in zip(a, E)))
 
-@lsqfitgui.plot
+#@lsqfitgui.plot
 def eff_mass(x, p):
    return np.log(fcn(x, p)/fcn(x+1, p))
 
-@lsqfitgui.plot
+#@lsqfitgui.plot
 def eff_wf(x, p):
    return np.exp(np.log(fcn(x, p)/fcn(x+1, p))*x) *fcn(x, p) 
 
