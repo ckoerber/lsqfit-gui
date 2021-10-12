@@ -1,7 +1,7 @@
 """Lsqfit GUI."""
 from typing import Optional, Callable, Dict, List, Any
 
-import functools
+#import functools
 import os
 from tempfile import NamedTemporaryFile
 
@@ -203,6 +203,7 @@ def run_server(
     return app
 
 #from functools import wraps
+'''
 def plot(fcn):
     @functools.wraps(fcn)
     def wrapper(*args, **kwargs):
@@ -212,3 +213,4 @@ def plot(fcn):
  
     #setattr(FitGUI._plot_fcns, fcn.__name__, wrapper)
     return functools
+'''
