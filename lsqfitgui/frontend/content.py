@@ -146,7 +146,7 @@ def get_content(fit, name: str = "Lsqfit GUI", plot_fcns: Optional[Dict[str, Cal
                         label="Details",
                         value="details",
                     )],
-                ], []), # trick: sum(list_of_lists, []] to concatenate lists
+                ], []), # trick: sum(list_of_lists, []) to concatenate lists
                 value="fit",
                 persistence=True,
                 persistence_type="local",

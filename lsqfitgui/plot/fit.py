@@ -38,9 +38,9 @@ def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None, 
     if not isinstance(fit.y, (dict, gv.BufferDict)):
         fig = fig or Figure()
 
-        if y is None and fcn is None:
+        if y is None and fcn is None: # show y
             plot_errors(fig, fit.x, gv.mean(fit.y), gv.sdev(fit.y), name="Data")
-        elif y is not None:
+        elif y is not None: # show transformed y
             plot_errors(fig, fit.x, gv.mean(y), gv.sdev(y), name="Data")
 
         if (
@@ -56,7 +56,7 @@ def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None, 
         )
 
         for n, (key, yy) in enumerate(fit.y.items()):
-            if fcn is None:
+            if y is None and fcn is None: # show y 
                 plot_errors(
                     fig,
                     fit.x[key] if isinstance(fit.x, dict) else fit.x,
@@ -66,16 +66,32 @@ def plot_fit(fit, fig: Optional[Figure] = None, fcn: Optional[Callable] = None, 
                     row=n + 1,
                     col=1,
                 )
-            plot_band(
-                fig,
-                x_fit[key] if isinstance(x_fit, dict) else x_fit,
-                y_min_fit[key],
-                y_mean_fit[key],
-                y_max_fit[key],
-                name=f"{key} fit",
-                row=n + 1,
-                col=1,
-            )
+            elif y is not None: # show transformed y
+                plot_errors(
+                    fig,
+                    fit.x[key] if isinstance(fit.x, dict) else fit.x,
+                    gv.mean(y[key]),
+                    gv.sdev(y[key]),
+                    name=f"{key} data",
+                    row=n + 1,
+                    col=1,
+                )
+
+            if (
+                (fcn is not None) # fcn specified => show plot fcn
+                or (y is None) # y is None => using fit.y => show fit; 
+                or all([(y[key] == fit.y[key]).all() for key in fit.y]) # y=fit.y as an argument => show fit
+            ):
+                plot_band(
+                    fig,
+                    x_fit[key] if isinstance(x_fit, dict) else x_fit,
+                    y_min_fit[key],
+                    y_mean_fit[key],
+                    y_max_fit[key],
+                    name=f"{key} fit",
+                    row=n + 1,
+                    col=1,
+                )
 
         fig.update_layout(height=len(fit.y) * 300)
 
