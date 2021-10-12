@@ -24,7 +24,8 @@ def main():
       fit_setup_kwargs={"n_exp": 4},
       meta_config=[
          {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
-      ]
+      ], 
+      #plot_fcns={'eff_mass' : eff_mass}
    )
 
 def generate_fit(**meta):

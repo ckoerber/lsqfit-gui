@@ -39,6 +39,7 @@ class FitGUI:
         meta_config: Optional[List[Dict]] = None,
         use_default_content: Optional[bool] = True,
         get_additional_content: Optional[html.Base] = None,
+        plot_fcns: Optional[Dict[str, Callable]] = None,
     ):
         """Initialize the GUI."""
         self.name = name
@@ -47,6 +48,7 @@ class FitGUI:
         self._meta_config = meta_config
         self.use_default_content = use_default_content
         self.get_additional_content = get_additional_content
+        self.plot_fcns = plot_fcns or FitGUI.plot_fcns
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -71,7 +73,7 @@ class FitGUI:
             meta_values=self._fit_setup_kwargs,
             use_default_content=self.use_default_content,
             get_additional_content=self.get_additional_content,
-            fcns=FitGUI.plot_fcns
+            plot_fcns=self.plot_fcns
         )
         self._callbacks = [
             self._update_layout_callback,
@@ -117,7 +119,7 @@ class FitGUI:
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
-                fcns=FitGUI.plot_fcns
+                plot_fcns=self.plot_fcns
             )
             self._setup_old = setup
         elif (
@@ -131,7 +133,7 @@ class FitGUI:
                 meta_config=self._meta_config,
                 use_default_content=self.use_default_content,
                 get_additional_content=self.get_additional_content,
-                fcns=FitGUI.plot_fcns
+                plot_fcns=self.plot_fcns
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
@@ -167,6 +169,7 @@ def run_server(
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     run_app: bool = True,
+    plot_fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ) -> Dash:
     """Provide dashboard for lsqfitgui."""
@@ -178,6 +181,7 @@ def run_server(
         meta_config=meta_config,
         use_default_content=use_default_content,
         get_additional_content=get_additional_content,
+        plot_fcns=plot_fcns
     )
     app = Dash(
         name,

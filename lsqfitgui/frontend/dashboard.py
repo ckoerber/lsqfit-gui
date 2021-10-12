@@ -32,7 +32,7 @@ def get_layout(
     meta_values: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    fcns = {}, # add type hint later
+    plot_fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ) -> html.Div:
     """Create sidebar and content given fit and config values.
@@ -48,7 +48,7 @@ def get_layout(
     sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
     sidebar.className = "sticky-top bg-light p-4"
 
-    content = get_content(fit, name=name, fcns=fcns) if use_default_content else None
+    content = get_content(fit, name=name, plot_fcns=plot_fcns) if use_default_content else None
     additional_content = get_additional_content(fit) if get_additional_content else None
 
     layout = html.Div(
@@ -102,7 +102,7 @@ def update_layout_from_prior(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
-    fcns: Optional[Dict[str, Callable]] = None,
+    plot_fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ):
     """Parse prior form input values to create new layout.
@@ -119,7 +119,7 @@ def update_layout_from_prior(
             meta_values=setup,
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
-            fcns=fcns
+            plot_fcns=plot_fcns
         ),
         new_fit,
     )
@@ -133,7 +133,7 @@ def update_layout_from_meta(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
-    fcns: Optional[Dict[str, Callable]] = None,
+    plot_fcns: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ):
     """Parse meta form input values to create new layout.
@@ -152,7 +152,7 @@ def update_layout_from_meta(
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
             meta_values=setup,
-            fcns=fcns
+            plot_fcns=plot_fcns
         ),
         new_fit,
     )

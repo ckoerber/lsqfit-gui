@@ -89,7 +89,7 @@ FCN_SOURCE_CALLBACK.args = (
 )
 
 
-def get_content(fit, name: str = "Lsqfit GUI", fcns: Optional[Dict[str, Callable]] = None): 
+def get_content(fit, name: str = "Lsqfit GUI", plot_fcns: Optional[Dict[str, Callable]] = None): 
     """Create default content block for fit object.
 
     This includes the plots for the data, residuals and details.
@@ -97,8 +97,9 @@ def get_content(fit, name: str = "Lsqfit GUI", fcns: Optional[Dict[str, Callable
     fig_fit = plot_fit(fit)
     fig_residuals = plot_residuals(fit)
     fig_fcn = {}
-    for key in fcns:
-        fig_fcn[key] = plot_fit(fit, fcn=fcns[key])
+    if plot_fcns is not None:
+        for key in plot_fcns:
+            fig_fcn[key] = plot_fit(fit, fcn=plot_fcns[key])
 
     content = html.Div(
         children=[
