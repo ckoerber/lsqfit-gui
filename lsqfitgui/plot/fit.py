@@ -31,13 +31,14 @@ LOG_MENU = dict(
 )
 
 
-def plot_fit(fit, fig: Optional[Figure] = None):
+def plot_fit(fit, fig: Optional[Figure] = None, fcn = None): # add type hint
     """Plot data and fit error bands."""
-    x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit)
+    x_fit, y_min_fit, y_mean_fit, y_max_fit = get_fit_bands(fit, fcn=fcn)
 
     if not isinstance(fit.y, (dict, gv.BufferDict)):
         fig = fig or Figure()
-        plot_errors(fig, fit.x, gv.mean(fit.y), gv.sdev(fit.y), name="Data")
+        if fcn is None:
+            plot_errors(fig, fit.x, gv.mean(fit.y), gv.sdev(fit.y), name="Data")
         plot_band(fig, x_fit, y_min_fit, y_mean_fit, y_max_fit, name="Fit")
     else:
         fig = fig or make_subplots(
@@ -45,15 +46,16 @@ def plot_fit(fit, fig: Optional[Figure] = None):
         )
 
         for n, (key, yy) in enumerate(fit.y.items()):
-            plot_errors(
-                fig,
-                fit.x[key] if isinstance(fit.x, dict) else fit.x,
-                gv.mean(yy),
-                gv.sdev(yy),
-                name=f"{key} data",
-                row=n + 1,
-                col=1,
-            )
+            if fcn is None:
+                plot_errors(
+                    fig,
+                    fit.x[key] if isinstance(fit.x, dict) else fit.x,
+                    gv.mean(yy),
+                    gv.sdev(yy),
+                    name=f"{key} data",
+                    row=n + 1,
+                    col=1,
+                )
             plot_band(
                 fig,
                 x_fit[key] if isinstance(x_fit, dict) else x_fit,

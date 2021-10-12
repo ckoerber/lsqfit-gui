@@ -3,7 +3,7 @@ import numpy as np
 import gvar as gv
 
 
-def get_fit_bands(fit):
+def get_fit_bands(fit, fcn = None): # add type hint
     """Get x, y_min, y_mean, y_max values for fit."""
     try:
         if isinstance(fit.x, dict):
@@ -15,7 +15,10 @@ def get_fit_bands(fit):
             x = np.linspace(fit.x.min(), fit.x.max(), 100)
     except Exception:
         x = fit.x
-    y = fit.fcn(x, fit.p)
+    if fcn is None:
+        y = fit.fcn(x, fit.p)
+    else:
+        y = fcn(x, fit.p)
     m = gv.mean(y)
     s = gv.sdev(y)
     return x, m - s, m, m + s

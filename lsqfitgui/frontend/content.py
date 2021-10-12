@@ -89,13 +89,17 @@ FCN_SOURCE_CALLBACK.args = (
 )
 
 
-def get_content(fit, name: str = "Lsqfit GUI"):
+def get_content(fit, name: str = "Lsqfit GUI", fcns = {}): # add type hint later
     """Create default content block for fit object.
 
     This includes the plots for the data, residuals and details.
     """
     fig_fit = plot_fit(fit)
     fig_residuals = plot_residuals(fit)
+    fig_fcn = {}
+    for key in fcns:
+        fig_fcn[key] = plot_fit(fit, fcn=fcns[key])
+
     content = html.Div(
         children=[
             html.H1(children=name),
@@ -120,21 +124,24 @@ def get_content(fit, name: str = "Lsqfit GUI"):
                 className="row",
             ),
             dcc.Tabs(
-                [
-                    dcc.Tab(
+                sum([
+                    [dcc.Tab(
                         children=[dcc.Graph(figure=fig_fit)], label="Fit", value="fit",
-                    ),
-                    dcc.Tab(
+                    )],
+                    [dcc.Tab(
+                        children=[dcc.Graph(figure=fig_fcn[key])], label=key, value=key,
+                    ) for key in fig_fcn],
+                    [dcc.Tab(
                         children=[dcc.Graph(figure=fig_residuals)],
                         label="Residuals",
                         value="residuals",
-                    ),
-                    dcc.Tab(
+                    )],
+                    [dcc.Tab(
                         children=[html.Pre(children=fit.format(maxline=True))],
                         label="Details",
                         value="details",
-                    ),
-                ],
+                    )],
+                ], []), # trick: sum(list_of_lists, []] to concatenate lists
                 value="fit",
                 persistence=True,
                 persistence_type="local",

@@ -32,6 +32,7 @@ def get_layout(
     meta_values: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
+    fcns = {}, # add type hint later
     **kwargs,
 ) -> html.Div:
     """Create sidebar and content given fit and config values.
@@ -47,7 +48,7 @@ def get_layout(
     sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
     sidebar.className = "sticky-top bg-light p-4"
 
-    content = get_content(fit, name=name) if use_default_content else None
+    content = get_content(fit, name=name, fcns=fcns) if use_default_content else None
     additional_content = get_additional_content(fit) if get_additional_content else None
 
     layout = html.Div(

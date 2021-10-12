@@ -39,7 +39,15 @@ def generate_fit(**meta):
 def fcn(x, p):                     # function used to fit x, y data
    a = p['a']                      # array of a[i]s
    E = p['E']                      # array of E[i]s
-   return sum(ai * np.exp(-Ei * x) for ai, Ei in zip(a, E))
+   return np.array(sum(ai * np.exp(-Ei * x) for ai, Ei in zip(a, E)))
+
+@lsqfitgui.plot
+def eff_mass(x, p):
+   return np.log(fcn(x, p)/fcn(x+1, p))
+
+@lsqfitgui.plot
+def eff_wf(x, p):
+   return np.exp(np.log(fcn(x, p)/fcn(x+1, p))*x) *fcn(x, p) 
 
 def make_prior(nexp):              # make priors for fit parameters
    prior = gv.BufferDict()         # any dictionary works

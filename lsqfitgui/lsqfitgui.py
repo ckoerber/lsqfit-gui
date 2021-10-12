@@ -1,6 +1,7 @@
 """Lsqfit GUI."""
 from typing import Optional, Callable, Dict, List, Any
 
+import functools
 import os
 from tempfile import NamedTemporaryFile
 
@@ -26,6 +27,8 @@ from lsqfitgui.frontend.dashboard import (
 
 class FitGUI:
     """Class which initializes the dashboard."""
+
+    _fcns_plots = {}
 
     def __init__(
         self,
@@ -68,6 +71,7 @@ class FitGUI:
             meta_values=self._fit_setup_kwargs,
             use_default_content=self.use_default_content,
             get_additional_content=self.get_additional_content,
+            fcns=FitGUI._fcns_plots
         )
         self._callbacks = [
             self._update_layout_callback,
@@ -184,3 +188,14 @@ def run_server(
     if run_app:
         app.run_server(debug=debug)
     return app
+
+#from functools import wraps
+def plot(fcn):
+    @functools.wraps(fcn)
+    def wrapper(*args, **kwargs):
+        return fcn(*args, **kwargs)
+
+    FitGUI._fcns_plots[fcn.__name__] = fcn
+ 
+    #setattr(FitGUI._plot_fcns, fcn.__name__, wrapper)
+    return functools
