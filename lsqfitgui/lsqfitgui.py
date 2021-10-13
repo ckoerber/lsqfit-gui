@@ -183,9 +183,9 @@ def run_server(
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
+        use_default_content=use_default_content,
     )
     fit_gui.name = name
-    fit_gui.use_default_content = use_default_content
     fit_gui.get_additional_content = get_additional_content
     fit_gui.plots += additional_plots or []
 
