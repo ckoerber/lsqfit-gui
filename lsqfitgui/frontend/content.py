@@ -103,18 +103,20 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
         kwargs = data.get("kwargs", {})
         fcn = data.get("fcn")
         x, y = data.get("x-data"), data.get("y-data")
+
         fig = None
+        if fcn is not None:
+            fig = fcn(fit, **kwargs)
         if x is not None and y is not None:
-            figure = plot_gvar(x, y, name=data.get("name"), fig=fig)
-        elif fcn is not None:
-            figure = fcn(fit, **kwargs)
-        else:
+            fig = plot_gvar(x, y, name=data.get("name"), fig=fig)
+        if fig is None:
             raise ValueError(f"Could not infer figure from {data}")
+
         figure_data.append(
             {
                 "label": data.get("name", f"Figure {n}"),
                 "tab-value": f"figure-{n}",
-                "figure": figure,
+                "figure": fig,
             }
         )
     return figure_data
