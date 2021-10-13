@@ -7,6 +7,7 @@ import gvar as gv
 import numpy as np
 
 from lsqfitgui import run_server
+from lsqfitgui.plot.uncertainty import wrap_plot_function
 
 XX = dict(
     d1=np.array([1, 2, 3, 4]),
@@ -34,8 +35,9 @@ def fitfcn(x, p):
     return {key: p["a"] + p[f"s{key[1:]}"] * x[key] for key in x}
 
 
+@wrap_plot_function(kind="band", name="Squared", opacity=0.5)
 def squared(x, p):
-    return {key: (p["a"] + p[f"s{key[1:]}"] * x[key])**2 for key in x}
+    return {key: (p["a"] + p[f"s{key[1:]}"] * x[key]) ** 2 for key in x}
 
 
 def get_fit():
@@ -44,9 +46,14 @@ def get_fit():
 
 
 def main():
-    y_squared = {key: gv.gvar(YY[key])**2 for key in YY}
+    y_squared = {key: gv.gvar(YY[key]) ** 2 for key in YY}
     """Run lsqfitgui server for multi-linear fit."""
-    run_server(get_fit(), plot_fcns={'Squared' : squared}, transformed_y={'Squared':y_squared})
+    run_server(
+        get_fit(),
+        additional_plots=[
+            {"name": "Squared", "fcn": squared, "y-data": y_squared, "x-data": XX,}
+        ],
+    )
 
 
 if __name__ == "__main__":
