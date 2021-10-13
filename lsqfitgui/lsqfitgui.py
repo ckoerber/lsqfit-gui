@@ -21,6 +21,7 @@ from lsqfitgui.frontend.dashboard import (
     SAVE_FIT_CALLBACK_ARGS,
     EXPORT_PRIOR_CALLBACK_ARGS,
     FCN_SOURCE_CALLBACK,
+    DEFAULT_PLOTS,
 )
 
 
@@ -35,15 +36,20 @@ class FitGUI:
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
+        use_default_content: bool = True,
     ):
         """Initialize the GUI."""
         self.name = None
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
-        self.use_default_content = True
+        self._use_default_content = use_default_content
         self.get_additional_content = None
         self.plots = []
+        self._layout = None
+
+        if self._use_default_content:
+            self.plots += DEFAULT_PLOTS
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -92,7 +98,7 @@ class FitGUI:
                 name=self.name,
                 meta_config=self._meta_config,
                 meta_values=self._fit_setup_kwargs,
-                use_default_content=self.use_default_content,
+                use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
             )
@@ -118,7 +124,7 @@ class FitGUI:
                 self._fit_setup_kwargs,
                 name=self.name,
                 meta_config=self._meta_config,
-                use_default_content=self.use_default_content,
+                use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
             )
@@ -132,7 +138,7 @@ class FitGUI:
                 setup=setup,
                 name=self.name,
                 meta_config=self._meta_config,
-                use_default_content=self.use_default_content,
+                use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
             )
@@ -181,7 +187,7 @@ def run_server(
     fit_gui.name = name
     fit_gui.use_default_content = use_default_content
     fit_gui.get_additional_content = get_additional_content
-    fit_gui.plots.append(additional_plots)
+    fit_gui.plots += additional_plots or []
 
     app = Dash(
         name,

@@ -90,8 +90,8 @@ FCN_SOURCE_CALLBACK.args = (
 )
 
 DEFAULT_PLOTS = [
-    {"label": "Fit", "fcn": plot_fit},
-    {"label": "Residuals", "fcn": plot_residuals},
+    {"name": "Fit", "fcn": plot_fit},
+    {"name": "Residuals", "fcn": plot_residuals},
 ]
 
 
@@ -162,7 +162,7 @@ def get_content(
                 ]
                 + [
                     dcc.Tab(
-                        children=[html.Pre(str(fit.format(maxlines=True)))],
+                        children=[html.Pre(str(fit.format(maxline=True)))],
                         label="Details",
                         value="tab-details",
                     )
