@@ -1,7 +1,22 @@
 """Plotting shortcuts for plotly error plots and bands."""
+from typing import Optional
+
 import numpy as np
+import gvar as gv
 
 import plotly.graph_objects as go
+
+
+def plot_gvar(x, y, fig: Optional[go.Figure], kind: str = "data", **kwargs):
+    """Plots gvars."""
+    fig = fig or go.Figure()
+    mean = gv.mean(y)
+    sdev = gv.sdev(y)
+    return (
+        plot_errors(fig, x, mean, sdev, **kwargs)
+        if kind == "data"
+        else plot_band(fig, x, mean - sdev, mean, mean + sdev, **kwargs)
+    )
 
 
 def plot_errors(fig, x, y, err, name=None, **kwargs):

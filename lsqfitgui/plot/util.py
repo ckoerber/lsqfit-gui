@@ -3,7 +3,7 @@ import numpy as np
 import gvar as gv
 
 
-def get_fit_bands(fit, fcn = None): # add type hint
+def get_fit_bands(fit, fcn=None):  # add type hint
     """Get x, y_min, y_mean, y_max values for fit."""
     try:
         if isinstance(fit.x, dict):
