@@ -14,7 +14,7 @@ from lsqfitgui.frontend.widgets.export_prior import (  # noqa
     toggle_prior_widget,
 )
 
-SIDEBAR_STYLE = {}
+SIDEBAR_STYLE = {"overflow-y": "auto", "height": "100vh"}
 
 
 def get_float_widget(
