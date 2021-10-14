@@ -4,7 +4,7 @@ See also https://lsqfit.readthedocs.io/en/latest/overview.html#basic-fits
 """
 
 import lsqfitgui
-from lsqfitgui.plot.uncertainty import wrap_plot_gvar
+from lsqfitgui.plot.uncertainty import wrap_plot_gvar, plot_gvar
 import lsqfit
 import numpy as np
 import gvar as gv
@@ -48,7 +48,8 @@ def main():
             },
             {
                 "name": "Effective WF",
-                "fcn": eff_wf,
+                # "fcn": eff_wf, # both would do the same thing
+                "fcn": plot_eff_wf,
                 "kwargs": {},  # passed to eff_mass function directly
                 "static_plot_gvar": {  # calls plot_gvar on the same figure
                     "x": x,
@@ -91,6 +92,19 @@ def eff_mass(x, p):
 @wrap_plot_gvar(kind="band", scatter_kwargs={"opacity": 0.5, "name": "Fit"})
 def eff_wf(x, p):
     return np.exp(np.log(fcn(x, p) / fcn(x + 1, p)) * x) * fcn(x, p)
+
+
+# The above call does effectively the below code
+
+
+def plot_eff_wf(fit):
+    ff = fcn(fit.x, fit.p)
+    return plot_gvar(
+        fit.x,
+        np.exp(np.log(ff / fcn(fit.x + 1, fit.p)) * fit.x) * ff,
+        kind="band",
+        scatter_kwargs={"opacity": 0.5, "name": "Fit"},
+    )
 
 
 def make_prior(nexp):  # make priors for fit parameters
