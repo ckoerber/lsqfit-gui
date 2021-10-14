@@ -10,6 +10,22 @@ from plotly.subplots import make_subplots
 from lsqfitgui.plot.util import LOG_MENU
 
 
+def interpolate(x, n=100):
+    """Tries to interpolate nested dictionaries of arrays."""
+    try:
+        if isinstance(x, dict):
+            xx = {}
+            for key, val in x.items():
+                xx[key] = interpolate(val, n=n)
+        else:
+            print(x)
+            xmin, xmax = np.nanmin(x), np.nanmax(x)
+            xx = np.linspace(xmin, xmax, num=n)
+    except Exception:
+        xx = x
+    return xx
+
+
 def wrap_plot_gvar(
     kind: str = "band",
     add_log_menu: bool = False,
@@ -19,17 +35,18 @@ def wrap_plot_gvar(
 
     def wrapper(fcn):
         def get_figure_from_fcn(fit, **fcn_kwargs):
-            xx = fit.x
             if kind == "band":
                 try:
-                    x_min, x_max = np.nanmin(fit.x), np.nanmax(fit.x)
-                    xx = np.linspace(x_min, x_max)
+                    print("interpolating")
+                    xx = interpolate(fit.x)
+                    yy = fcn(xx, fit.p)
                 except Exception:
-                    pass
+                    xx = fit.x
+                    yy = fcn(fit.x, fit.p)
 
             return plot_gvar(
                 xx,
-                fcn(xx, fit.p, **fcn_kwargs),
+                yy,
                 fig=None,
                 kind=kind,
                 add_log_menu=add_log_menu,
@@ -73,11 +90,13 @@ def plot_gvar(
             mean = gv.mean(y[key])
             sdev = gv.sdev(y[key])
             sub_scatter_kwargs = scatter_kwargs.copy()
-            sub_scatter_kwargs["name"] = sub_scatter_kwargs.get("name", "") + ", {key}"
+            sub_scatter_kwargs["name"] = sub_scatter_kwargs.get("name", "") + f", {key}"
+
+            xx = x[key] if isinstance(x, dict) else x
             if kind == "errorbars":
                 plot_errorbars(
                     fig,
-                    x[key] if isinstance(x, dict) else x,
+                    xx,
                     mean,
                     sdev,
                     scatter_kwargs=sub_scatter_kwargs,
@@ -86,7 +105,7 @@ def plot_gvar(
             elif kind == "band":
                 plot_band(
                     fig,
-                    x[key] if isinstance(x, dict) else x,
+                    xx,
                     mean - sdev,
                     mean,
                     mean + sdev,
