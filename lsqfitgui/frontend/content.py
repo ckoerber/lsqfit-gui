@@ -102,13 +102,13 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
     for n, data in enumerate(plots):
         kwargs = data.get("kwargs", {})
         fcn = data.get("fcn")
-        x, y = data.get("x-data"), data.get("y-data")
+        static_data = data.get("static_plot_gvar", {})
 
         fig = None
         if fcn is not None:
             fig = fcn(fit, **kwargs)
-        if x is not None and y is not None:
-            fig = plot_gvar(x, y, name=data.get("name"), fig=fig)
+        if static_data:
+            fig = plot_gvar(**static_data, fig=fig)
         if fig is None:
             raise ValueError(f"Could not infer figure from {data}")
 

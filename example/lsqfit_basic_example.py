@@ -4,7 +4,7 @@ See also https://lsqfit.readthedocs.io/en/latest/overview.html#basic-fits
 """
 
 import lsqfitgui
-from lsqfitgui.plot.uncertainty import wrap_plot_function
+from lsqfitgui.plot.uncertainty import wrap_plot_gvar
 import lsqfit
 import numpy as np
 import gvar as gv
@@ -38,14 +38,24 @@ def main():
             {
                 "name": "Effective mass",
                 "fcn": eff_mass,
-                "x-data": x,
-                "y-data": y_eff_mass,
+                "kwargs": {},  # passed to eff_mass function directly
+                "static_plot_gvar": {  # calls plot_gvar on the same figure
+                    "x": x,
+                    "y": y_eff_mass,
+                    "kind": "errorbars",
+                    "scatter_kwargs": {"name": "Data"},
+                },
             },
             {
-                "name": "Effective mass wf",
+                "name": "Effective WF",
                 "fcn": eff_wf,
-                "x-data": x,
-                "y-data": y_eff_wf,
+                "kwargs": {},  # passed to eff_mass function directly
+                "static_plot_gvar": {  # calls plot_gvar on the same figure
+                    "x": x,
+                    "y": y_eff_wf,
+                    "kind": "errorbars",
+                    "scatter_kwargs": {"name": "Data"},
+                },
             },
         ],
     )
@@ -73,12 +83,12 @@ def fcn(x, p):
     return np.array(sum(ai * np.exp(-Ei * x) for ai, Ei in zip(p["a"], p["E"])))
 
 
-@wrap_plot_function(kind="band", opacity=0.5, name="fit")
+@wrap_plot_gvar(kind="band", scatter_kwargs={"opacity": 0.5, "name": "Fit"})
 def eff_mass(x, p):
     return np.log(fcn(x, p) / fcn(x + 1, p))
 
 
-@wrap_plot_function(kind="band", opacity=0.5, name="fit")
+@wrap_plot_gvar(kind="band", scatter_kwargs={"opacity": 0.5, "name": "Fit"})
 def eff_wf(x, p):
     return np.exp(np.log(fcn(x, p) / fcn(x + 1, p)) * x) * fcn(x, p)
 
