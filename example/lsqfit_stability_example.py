@@ -125,9 +125,9 @@ def plot_stability(fit, **kwargs):
         e0 = fit.p[k2s(t_min, t_max, n_exp, "E")][0]
         data.append(
             {
-                "t_min": t_min
+                "t_min": t_min  # slightly shift x values for differnt markers
                 + (n_exp - N_EXP_RANGE[0] - delta_n_exp / 2) / delta_n_exp * 0.1,
-                "t_max": str(t_max),
+                "t_max": str(t_max),  # This makes plotly use discrete colors
                 "n_exp": str(n_exp),
                 "E0 mean": e0.mean,
                 "E0 sdev": e0.sdev,
