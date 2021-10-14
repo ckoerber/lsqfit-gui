@@ -18,7 +18,6 @@ def interpolate(x, n=100):
             for key, val in x.items():
                 xx[key] = interpolate(val, n=n)
         else:
-            print(x)
             xmin, xmax = np.nanmin(x), np.nanmax(x)
             xx = np.linspace(xmin, xmax, num=n)
     except Exception:
@@ -37,7 +36,6 @@ def wrap_plot_gvar(
         def get_figure_from_fcn(fit, **fcn_kwargs):
             if kind == "band":
                 try:
-                    print("interpolating")
                     xx = interpolate(fit.x)
                     yy = fcn(xx, fit.p)
                 except Exception:
