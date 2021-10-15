@@ -3,3 +3,4 @@ pytest
 black
 sphinx
 sphinx-rtd-theme
+myst-parser
