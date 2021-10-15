@@ -1,3 +1,5 @@
 dash[testing]
 pytest
 black
+sphinx
+sphinx-rtd-theme

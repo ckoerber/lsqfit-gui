@@ -1,2 +1,2 @@
-"""Lsqfit GUI."""
-from lsqfitgui.lsqfitgui import FitGUI, run_server#, plot  # noqa
+"""The Python package **lsqfitgui** provides a Graphical User Interface to `lsqfit`."""
+from lsqfitgui.lsqfitgui import FitGUI, run_server  # noqa
