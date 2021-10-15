@@ -19,14 +19,15 @@ T_MIN_RANGE = range(0, 4)
 T_MAX_RANGE = range(8, 9)
 N_EXP_RANGE = range(2, 5)
 RANGE_PRODUCT = list(product(T_MIN_RANGE, T_MAX_RANGE, N_EXP_RANGE))
+KEYS = ("t_min", "t_max", "n_exp")
 
 
-def k2s(*args) -> str:
+def k2s(**kwargs) -> str:
     """Maps multiple arguments to a string.
 
     Needed since gui labels need to be strings.
     """
-    return ", ".join(map(str, args))
+    return ", ".join([f"{key}={value}" for key, value in kwargs.items()])
 
 
 def generate_fit():
@@ -36,12 +37,11 @@ def generate_fit():
     prior = gv.BufferDict()
     p0 = None
     for t_min, t_max, n_exp in RANGE_PRODUCT:
-        kkey = k2s(t_min, t_max, n_exp)
-        xx[kkey], yy[kkey] = make_data(t_min=t_min, t_max=t_max)
+        kwargs = dict(zip(KEYS, (t_min, t_max, n_exp)))
 
-        args = (t_min, t_max, n_exp)
+        xx[k2s(**kwargs)], yy[k2s(**kwargs)] = make_data(t_min=t_min, t_max=t_max)
         for key, val in make_prior(nexp=n_exp).items():
-            prior[k2s(*args, key)] = val
+            prior[k2s(**kwargs, key=key)] = val
 
     fit = lsqfit.nonlinear_fit(data=(xx, yy), fcn=fcn, prior=prior, p0=p0,)
     return fit
@@ -59,11 +59,14 @@ def fcn(x, p, individual_priors: bool = False):
     out = {}
     for args in RANGE_PRODUCT:
 
-        a = p[k2s(*args, "a")]
-        E = p[k2s(*args, "E")]
-        xx = x[k2s(*args)]
+        kwargs = dict(zip(KEYS, args))
+        a = p[k2s(**kwargs, key="a")]
+        E = p[k2s(**kwargs, key="E")]
+        xx = x[k2s(**kwargs)]
 
-        out[k2s(*args)] = np.array(sum([ai * np.exp(-Ei * xx) for ai, Ei in zip(a, E)]))
+        out[k2s(**kwargs)] = np.array(
+            sum([ai * np.exp(-Ei * xx) for ai, Ei in zip(a, E)])
+        )
     return out
 
 
@@ -122,7 +125,8 @@ def plot_stability(fit, **kwargs):
     data = []
     e0s = []
     for t_min, t_max, n_exp in RANGE_PRODUCT:
-        e0 = fit.p[k2s(t_min, t_max, n_exp, "E")][0]
+        kwargs = dict(zip(KEYS, (t_min, t_max, n_exp)))
+        e0 = fit.p[k2s(**kwargs, key="E")][0]
         data.append(
             {
                 "t_min": t_min  # slightly shift x values for differnt markers

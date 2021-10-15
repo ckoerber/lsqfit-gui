@@ -72,7 +72,7 @@ def get_sidebar(
     table_rows = []
     for key, val in elements.items():
         if hasattr(val, "__len__"):
-            table_rows.append(html.Tr([html.Td(html.B(key))]))
+            table_rows.append(html.Tr([html.Td(html.B(key), colSpan=3)]))
             for n, dist in enumerate(val):
                 name = f"{key}__array_{n}"
                 row_content = [
