@@ -1,5 +1,5 @@
-"""Plotting shortcuts for plotly error plots and bands."""
-from typing import Optional, Dict, Any
+"""Plotting shortcuts for plotly errorbar plots and bands."""
+from typing import Optional, Dict, Any, Union, Callable
 
 import numpy as np
 import gvar as gv
@@ -7,6 +7,7 @@ import gvar as gv
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from lsqfit import nonlinear_fit
 from lsqfitgui.plot.util import LOG_MENU
 
 
@@ -29,8 +30,34 @@ def wrap_plot_gvar(
     kind: str = "band",
     add_log_menu: bool = False,
     scatter_kwargs: Optional[Dict] = None,
-):
-    """Wrapper to generate plot of gvars for functions."""
+) -> Callable[[nonlinear_fit], go.Figure]:
+    """Wraps functions taking `x` and `p` arguments such that they can be used by the :attr:`lsqfitgui.FitGUI.plots` to generate plots of gvars.
+
+    Arguments:
+        kind: Allowed values: "band", "errorbar".
+            Returned figure will contain errorbars or errorbands.
+        add_log_menu: Should the returned figure have an menu allowing to change from regular to log y-axis?
+        scatter_kwargs: Keyword arguments passed to go.Scatter().
+
+    Example:
+        The code below presents how to use the wrapper to add new plots to the gui::
+
+            def fcn(x, p):
+                yy = ...
+                return yy
+
+            def plot_fcn(fit):
+                yy = fcn(fit.x, fit.p)
+                return plot_gvar(fit.x, yy, kind="band")
+
+            @wrap_plot_gvar(kind="bands")
+            def wrapped_fcn(x, p):
+                return fcn(x, p)
+
+            gui.plots.append({"name": "Fcn results", "fcn": wrapped_fcn})
+
+        Both functions, `wrapped_fcn` and `plot_fcn` will produce the same plot when added to the gui.
+    """  # noqa: E501, D202, D401
 
     def wrapper(fcn):
         def get_figure_from_fcn(fit, **fcn_kwargs):
@@ -57,14 +84,27 @@ def wrap_plot_gvar(
 
 
 def plot_gvar(
-    x,
-    y,
+    x: Union[np.ndarray, Dict[str, np.ndarray]],
+    y: gv.BufferDict,
     fig: Optional[go.Figure] = None,
     kind: str = "band",
     add_log_menu: bool = False,
     scatter_kwargs: Optional[Dict] = None,
-):
-    """Plots gvars."""
+) -> go.Figure:
+    """Plot gvars as go.Figures including their uncertainties.
+
+    Arguments:
+        x: The independent variable.
+            Can be either an array or a dictionary of arrays where keys must match the keys of the dependent variable.
+            If `kind="band"`, tries to interpolate the values.
+        y: The dependent variable.
+            If it is a dictionary of gvar arrays, the figure will contain several sub figures.
+        fig: Figure to add traces to. If not specified, creates a new figure.
+        kind: Either "band" or "errorbars".
+        add_log_menu: Add a menu to switch from a linear to a log scale.
+            Only available if `y` is not a dictionary.
+        scatter_kwargs: Keyword arguments passed to `go.Scatter`.
+    """  # noqa: E501
     fig_was_none = fig is None
     scatter_kwargs = scatter_kwargs or {}
 

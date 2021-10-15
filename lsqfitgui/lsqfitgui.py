@@ -71,8 +71,6 @@ class FitGUI:
                     fit_setup_kwargs=fit_setup_kwargs,
                     meta_config=meta_config
                 )
-
-            See also the :doc:`/examples` for more details.
         """  # noqa: E501
         self.name: str = None
         """Name of the app displayed as title and browser tab title."""
@@ -88,7 +86,24 @@ class FitGUI:
         self.plots: List[Dict[str, Any]] = []
         """List of dictionaries specifying plots rendered in the tab element.
         Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
-        See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS` and :doc:`/examples`.
+
+        Example:
+            Plot the fit results::
+
+                def plot_fcn(fit):
+                    yy = fit.fcn(fit.x, fit.p)
+                    return plot_gvar(fit.x, yy, kind="band")
+
+                gui.plots.append({"name": "Fit results", "fcn": plot_fcn})
+
+        **Allowed keywords are**
+
+        * **name** *(str)*: The name presented in the tabs.
+        * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
+        * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
+        * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
+
+        See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
         """  # noqa: E501
 
         if self._use_default_content:
@@ -243,7 +258,8 @@ def run_server(
         get_additional_content: Function used to determine dynamic content depending on fit results.
         additional_plots: List of dictionaries specifying plots rendered in the tab element.
             Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
-            See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS` and :doc:`/examples`.
+            This populates :attr:`FitGUI.plots`.
+            See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
         run_app: Call run server on the dash app.
         debug: Run the dash app in debug mode. Only used if `run_app=True`.
         host: The hosting address of the dash app. Only used if `run_app=True`.
@@ -269,8 +285,6 @@ def run_server(
                 fit_setup_kwargs=fit_setup_kwargs,
                 meta_config=meta_config
             )
-
-        See also the :doc:`/examples` for more details.
     """  # noqa: E501
     fit_gui = FitGUI(
         fit=fit,
