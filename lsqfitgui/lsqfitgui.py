@@ -222,19 +222,56 @@ def run_server(
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     additional_plots: Optional[Dict[str, Callable]] = None,
-    debug: bool = True,
     run_app: bool = True,
+    debug: bool = True,
     host: str = "localhost",
     port: int = 8000,
 ) -> Dash:
-    """Initialize dashboard and run app locally.
+    """Initialize the GUI and start the dash app.
+
+    Requires either a `fit` object or a `fit_setup_function`.
 
     Arguments:
-        fit:
+        fit: Non-linear fit object.
+        name: Name of the app displayed as title and browser tab title.
+        fit_setup_function: Function which returns a non-linear fit object.
+            It's keywords are provided by `fit_setup_kwargs`.
+        fit_setup_kwargs: Initial kwargs which are passed to the `fit_setup_function` for creating the first fit object.
+        meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
+            These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
+        use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
+        get_additional_content: Function used to determine dynamic content depending on fit results.
+        additional_plots: List of dictionaries specifying plots rendered in the tab element.
+            Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
+            See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS` and :doc:`/examples`.
+        run_app: Call run server on the dash app.
+        debug: Run the dash app in debug mode. Only used if `run_app=True`.
+        host: The hosting address of the dash app. Only used if `run_app=True`.
+        port: The port of the dash app. Only used if `run_app=True`.
 
-    Examples:
+    Example:
+        The most basic example just requires a nonlinear_fit object::
 
-    """
+            fit = lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+            app = run_server(fit)
+
+        More sophisticated examples, where also meta arguments are used, are::
+
+            def generate_fit(n_exp=3):
+                ...
+                return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+
+            fit_setup_kwargs = {"n_exp": 3}
+            meta_config = {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
+
+            app = run_server(
+                fit_setup_function=generate_fit,
+                fit_setup_kwargs=fit_setup_kwargs,
+                meta_config=meta_config
+            )
+
+        See also the :doc:`/examples` for more details.
+    """  # noqa: E501
     fit_gui = FitGUI(
         fit=fit,
         fit_setup_function=fit_setup_function,
