@@ -31,8 +31,10 @@ release = "0.0.1"
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary", "sphinx.ext.napoleon"]
 
+autoclass_content = "both"
 autodoc_typehints = "description"
 autodoc_preserve_defaults = True
+napoleon_use_admonition_for_examples = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
