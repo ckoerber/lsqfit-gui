@@ -1,5 +1,5 @@
 """Submodule providing GUI content."""
-from typing import Optional, Dict, Callable, List
+from typing import Optional, Dict, Callable, List, Any
 
 from inspect import getsource
 
@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from lsqfitgui.plot.fit import plot_fit, plot_residuals
+from lsqfitgui.plot.uncertainty import plot_gvar
 from lsqfitgui.util.function import parse_function_expression
 from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
 
@@ -88,23 +89,47 @@ FCN_SOURCE_CALLBACK.args = (
     [State("collapse-function-source", "is_open")],
 )
 
+DEFAULT_PLOTS = [
+    {"name": "Fit", "fcn": plot_fit},
+    {"name": "Residuals", "fcn": plot_residuals},
+]
 
-def get_content(fit, name: str = "Lsqfit GUI", plot_fcns: Optional[Dict[str, Callable]] = None, transformed_y: Optional[Dict] = None): 
+
+def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
+    """Infers the figures to be plotted from the most recent fit and plot config."""
+    plots = plots or []
+    figure_data = []
+    for n, data in enumerate(plots):
+        kwargs = data.get("kwargs", {})
+        fcn = data.get("fcn")
+        static_data = data.get("static_plot_gvar", {})
+
+        fig = None
+        if fcn is not None:
+            fig = fcn(fit, **kwargs)
+        if static_data:
+            fig = plot_gvar(**static_data, fig=fig)
+        if fig is None:
+            raise ValueError(f"Could not infer figure from {data}")
+
+        figure_data.append(
+            {
+                "label": data.get("name", f"Figure {n}"),
+                "tab-value": f"figure-{n}",
+                "figure": fig,
+            }
+        )
+    return figure_data
+
+
+def get_content(
+    fit, name: str = "Lsqfit GUI", plots: Optional[List[Dict[str, Any]]] = None,
+):
     """Create default content block for fit object.
 
     This includes the plots for the data, residuals and details.
     """
-    fig_fit = plot_fit(fit)
-    fig_residuals = plot_residuals(fit)
-    fig_fcn = {}
-    for key in set(plot_fcns).union(transformed_y):
-        if key in plot_fcns and key in transformed_y:
-            fig_fcn[key] = plot_fit(fit, fcn=plot_fcns[key], y=transformed_y[key])
-        elif key in plot_fcns:
-            fig_fcn[key] = plot_fit(fit, fcn=plot_fcns[key])
-        elif key in transformed_y:
-            fig_fcn[key] = plot_fit(fit, y=transformed_y[key])
-
+    figure_data = get_figures(fit, plots)
     content = html.Div(
         children=[
             html.H1(children=name),
@@ -129,25 +154,22 @@ def get_content(fit, name: str = "Lsqfit GUI", plot_fcns: Optional[Dict[str, Cal
                 className="row",
             ),
             dcc.Tabs(
-                sum([
-                    [dcc.Tab(
-                        children=[dcc.Graph(figure=fig_fit)], label="Fit", value="fit",
-                    )],
-                    [dcc.Tab(
-                        children=[dcc.Graph(figure=fig_fcn[key])], label=key, value=key,
-                    ) for key in fig_fcn],
-                    [dcc.Tab(
-                        children=[dcc.Graph(figure=fig_residuals)],
-                        label="Residuals",
-                        value="residuals",
-                    )],
-                    [dcc.Tab(
-                        children=[html.Pre(children=fit.format(maxline=True))],
+                [
+                    dcc.Tab(
+                        children=[dcc.Graph(figure=data["figure"])],
+                        label=data["label"],
+                        value=data["tab-value"],
+                    )
+                    for data in figure_data
+                ]
+                + [
+                    dcc.Tab(
+                        children=[html.Pre(str(fit.format(maxline=True)))],
                         label="Details",
-                        value="details",
-                    )],
-                ], []), # trick: sum(list_of_lists, []) to concatenate lists
-                value="fit",
+                        value="tab-details",
+                    )
+                ],
+                value=figure_data[0]["tab-value"] if figure_data else "tab-details",
                 persistence=True,
                 persistence_type="local",
                 persisted_props=["value"],
