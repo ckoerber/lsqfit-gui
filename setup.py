@@ -2,7 +2,7 @@
 """Setup file for lsqfitgui."""
 from lsqfitgui.version import __version__
 
-__author__ = "@ckoerber"
+__author__ = "@ckoerber, @millernb"
 
 from os import path
 
