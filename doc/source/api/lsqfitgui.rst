@@ -1,4 +1,4 @@
-lsqfitgui
+API: lsqfitgui
 =================
 
 

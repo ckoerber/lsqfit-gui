@@ -123,17 +123,17 @@ class FitGUI:
         self._fit = self.initial_fit
 
     @property
-    def fit(self):
+    def fit(self) -> nonlinear_fit:
         """Return current fit object."""
         return self._fit
 
     @property
-    def initial_fit(self):
+    def initial_fit(self) -> nonlinear_fit:
         """Return fit object used to initialize the app."""
         return self._initial_fit
 
     @property
-    def layout(self):
+    def layout(self) -> html.Base:
         """Return the current layout."""
         if self._layout is None:
             self._layout = get_layout(
