@@ -216,17 +216,25 @@ class FitGUI:
 def run_server(
     fit: Optional[nonlinear_fit] = None,
     name: str = "Lsqfit GUI",
-    debug: bool = True,
     fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    run_app: bool = True,
     additional_plots: Optional[Dict[str, Callable]] = None,
-    **kwargs,
+    debug: bool = True,
+    run_app: bool = True,
+    host: str = "localhost",
+    port: int = 8000,
 ) -> Dash:
-    """Provide dashboard for lsqfitgui."""
+    """Initialize dashboard and run app locally.
+
+    Arguments:
+        fit:
+
+    Examples:
+
+    """
     fit_gui = FitGUI(
         fit=fit,
         fit_setup_function=fit_setup_function,
@@ -248,5 +256,5 @@ def run_server(
 
     fit_gui.setup(app)
     if run_app:
-        app.run_server(debug=debug)
+        app.run_server(host=host, debug=debug, port=port)
     return app
