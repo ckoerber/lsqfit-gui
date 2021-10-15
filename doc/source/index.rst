@@ -12,7 +12,7 @@ lsqfitgui documentation
 
    quickstart
    examples
-   api/modules
+   api/lsqfitgui
 
 
 Indices and tables
