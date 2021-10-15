@@ -1,5 +1,5 @@
 """Provides dashboard for lsqfitgui."""
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, List
 
 from dash import html
 from dash.dependencies import Input, Output
@@ -21,7 +21,7 @@ from lsqfitgui.frontend.sidebar import (  # noqa
 )
 
 from lsqfitgui.frontend.content import get_content
-from lsqfitgui.frontend.content import FCN_SOURCE_CALLBACK  # noqa
+from lsqfitgui.frontend.content import FCN_SOURCE_CALLBACK, DEFAULT_PLOTS  # noqa
 from lsqfitgui.backend.sidebar import process_priors, process_meta
 
 
@@ -32,7 +32,7 @@ def get_layout(
     meta_values: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    **kwargs,
+    plots: Optional[List[Dict[str, Any]]] = None,
 ) -> html.Div:
     """Create sidebar and content given fit and config values.
 
@@ -47,7 +47,7 @@ def get_layout(
     sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
     sidebar.className = "sticky-top bg-light p-4"
 
-    content = get_content(fit, name=name) if use_default_content else None
+    content = get_content(fit, name=name, plots=plots) if use_default_content else None
     additional_content = get_additional_content(fit) if get_additional_content else None
 
     layout = html.Div(
@@ -101,7 +101,7 @@ def update_layout_from_prior(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
-    **kwargs,
+    plots: Optional[List[Dict[str, Any]]] = None,
 ):
     """Parse prior form input values to create new layout.
 
@@ -117,6 +117,7 @@ def update_layout_from_prior(
             meta_values=setup,
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
+            plots=plots,
         ),
         new_fit,
     )
@@ -130,7 +131,7 @@ def update_layout_from_meta(
     meta_config: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable] = None,
-    **kwargs,
+    plots: Optional[List[Dict[str, Any]]] = None,
 ):
     """Parse meta form input values to create new layout.
 
@@ -145,9 +146,10 @@ def update_layout_from_meta(
             new_fit,
             name=name,
             meta_config=meta_config,
+            meta_values=setup,
             use_default_content=use_default_content,
             get_additional_content=get_additional_content,
-            meta_values=setup,
+            plots=plots,
         ),
         new_fit,
     )

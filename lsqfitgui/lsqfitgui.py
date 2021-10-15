@@ -21,29 +21,35 @@ from lsqfitgui.frontend.dashboard import (
     SAVE_FIT_CALLBACK_ARGS,
     EXPORT_PRIOR_CALLBACK_ARGS,
     FCN_SOURCE_CALLBACK,
+    DEFAULT_PLOTS,
 )
 
 
 class FitGUI:
     """Class which initializes the dashboard."""
 
+    plot_fcns = {}
+
     def __init__(
         self,
         fit: Optional[Dict] = None,
-        name: Optional[str] = None,
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
-        use_default_content: Optional[bool] = True,
-        get_additional_content: Optional[html.Base] = None,
+        use_default_content: bool = True,
     ):
         """Initialize the GUI."""
-        self.name = name
+        self.name = None
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
-        self.use_default_content = use_default_content
-        self.get_additional_content = get_additional_content
+        self._use_default_content = use_default_content
+        self.get_additional_content = None
+        self.plots = []
+        self._layout = None
+
+        if self._use_default_content:
+            self.plots += DEFAULT_PLOTS
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -51,9 +57,9 @@ class FitGUI:
                 " to initialize the GUI."
             )
         elif fit_setup_function is not None:
-            self.initial_fit = fit_setup_function(**self._fit_setup_kwargs)
+            self._initial_fit = fit_setup_function(**self._fit_setup_kwargs)
         else:
-            self.initial_fit = fit
+            self._initial_fit = fit
 
         if not allclose(
             evalcorr(self.initial_fit.prior.flatten()),
@@ -61,14 +67,6 @@ class FitGUI:
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 
-        self._layout = get_layout(
-            self.initial_fit,
-            name=self.name,
-            meta_config=self._meta_config,
-            meta_values=self._fit_setup_kwargs,
-            use_default_content=self.use_default_content,
-            get_additional_content=self.get_additional_content,
-        )
         self._callbacks = [
             self._update_layout_callback,
             self._save_fit_callback,
@@ -87,8 +85,23 @@ class FitGUI:
         return self._fit
 
     @property
+    def initial_fit(self):
+        """Return current fit object."""
+        return self._initial_fit
+
+    @property
     def layout(self):
         """Return the current layout."""
+        if self._layout is None:
+            self._layout = get_layout(
+                self.initial_fit,
+                name=self.name,
+                meta_config=self._meta_config,
+                meta_values=self._fit_setup_kwargs,
+                use_default_content=self._use_default_content,
+                get_additional_content=self.get_additional_content,
+                plots=self.plots,
+            )
         return self._layout
 
     def setup(self, app):
@@ -111,8 +124,9 @@ class FitGUI:
                 self._fit_setup_kwargs,
                 name=self.name,
                 meta_config=self._meta_config,
-                use_default_content=self.use_default_content,
+                use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
+                plots=self.plots,
             )
             self._setup_old = setup
         elif (
@@ -124,8 +138,9 @@ class FitGUI:
                 setup=setup,
                 name=self.name,
                 meta_config=self._meta_config,
-                use_default_content=self.use_default_content,
+                use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
+                plots=self.plots,
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
@@ -143,8 +158,6 @@ class FitGUI:
     _save_fit_callback.kwargs = {"prevent_initial_call": True}
 
     def _export_prior_callback(self, *args, **kwargs):
-        """
-        """
         return toggle_prior_widget(*args, **kwargs)
 
     _export_prior_callback.args = EXPORT_PRIOR_CALLBACK_ARGS
@@ -161,18 +174,21 @@ def run_server(
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     run_app: bool = True,
+    additional_plots: Optional[Dict[str, Callable]] = None,
     **kwargs,
 ) -> Dash:
     """Provide dashboard for lsqfitgui."""
     fit_gui = FitGUI(
         fit=fit,
-        name=name,
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
         use_default_content=use_default_content,
-        get_additional_content=get_additional_content,
     )
+    fit_gui.name = name
+    fit_gui.get_additional_content = get_additional_content
+    fit_gui.plots += additional_plots or []
+
     app = Dash(
         name,
         external_stylesheets=EXTERNAL_STYLESHEETS,
@@ -180,6 +196,7 @@ def run_server(
         assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
     )
     app.fit_gui = fit_gui
+
     fit_gui.setup(app)
     if run_app:
         app.run_server(debug=debug)
