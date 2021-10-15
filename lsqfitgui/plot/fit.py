@@ -4,17 +4,21 @@ from typing import Optional
 from plotly.graph_objects import Figure
 
 from lsqfitgui.plot.util import get_residuals
-from lsqfitgui.plot.uncertainty import plot_gvar
+from lsqfitgui.plot.uncertainty import plot_gvar, interpolate
 
 
 def plot_fit(fit, fig: Optional[Figure] = None):  # add type hint
     """Plot data and fit error bands."""
+
+    try:
+        xx = interpolate(fit.x)
+        yy = fit.fcn(xx, fit.p)
+    except Exception:
+        xx = fit.x
+        yy = fit.fcn(fit.x, fit.p)
+
     fig = plot_gvar(
-        fit.x,
-        fit.fcn(fit.x, fit.p),
-        kind="band",
-        add_log_menu=True,
-        scatter_kwargs={"name": "Fit"},
+        xx, yy, kind="band", add_log_menu=True, scatter_kwargs={"name": "Fit"},
     )
     fig = plot_gvar(
         fit.x, fit.y, kind="errorbars", fig=fig, scatter_kwargs={"name": "Data"}
