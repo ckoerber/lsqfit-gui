@@ -64,7 +64,7 @@ class FitGUI:
                     return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
 
                 fit_setup_kwargs = {"n_exp": 3}
-                meta_config = {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
+                meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
 
                 gui = FitGUI(
                     fit_setup_function=generate_fit,
