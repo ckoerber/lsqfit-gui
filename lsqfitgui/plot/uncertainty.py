@@ -50,7 +50,7 @@ def wrap_plot_gvar(
                 yy = fcn(fit.x, fit.p)
                 return plot_gvar(fit.x, yy, kind="band")
 
-            @wrap_plot_gvar(kind="bands")
+            @wrap_plot_gvar(kind="band")
             def wrapped_fcn(x, p):
                 return fcn(x, p)
 

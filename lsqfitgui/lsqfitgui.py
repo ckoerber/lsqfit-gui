@@ -1,7 +1,7 @@
 """This module provides interfaces for running a lsqfit dashboard GUI.
 
-The object creating the GUI is the :class:`FitGUI` class.
-The :func:`run_server` method provides a convinient interafce which also starts the Dash app.
+The :class:`FitGUI` class provides the interface to `lsqfit` providing dynamic html elements which can be embedded into a dash (flask) app.
+The :func:`run_server` method provides a convinient interafce which also starts the Dash app which is accessible by any (local) browser.
 """  # noqa: E501
 from typing import Optional, Callable, Dict, List, Any
 
@@ -278,7 +278,7 @@ def run_server(
                 return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
 
             fit_setup_kwargs = {"n_exp": 3}
-            meta_config = {"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}
+            meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
 
             app = run_server(
                 fit_setup_function=generate_fit,

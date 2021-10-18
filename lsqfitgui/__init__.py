@@ -1,7 +1,7 @@
-"""The Python package **lsqfitgui** provides a Graphical User Interface to `lsqfit`.
+"""The Python package **lsqfitgui** provides a Graphical User Interface to ``lsqfit``.
 
-The object creating the GUI is the :class:`FitGUI` class.
-The :func:`run_server` method provides a convinient interafce which also starts the Dash app.
+The :class:`FitGUI` class provides the interface to ``lsqfit`` providing dynamic html elements which can be embedded into a ``dash`` (``flask``) app.
+The :func:`run_server` method provides a convinient interafce creating the GUI and starting the dash which is accessible by any (local) browser.
 
 The :func:`wrap_plot_gvar` and :func:`plot_gvar` methods can be used to generate plots form gvars.
 """  # noqa: E501
