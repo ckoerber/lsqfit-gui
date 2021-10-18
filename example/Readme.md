@@ -18,4 +18,8 @@ python enrtypoint.py
 ```
 to also use the `meta_config` version.
 
-2. ... To be updated...
+2. The `lsqfit` basic example for multi-exponential fits is described by `lsqfit_basic_example.py`
+
+3. The `multi_key_example.py` example shows how arrays of priors can be used.
+
+4. The `lsqfit_stability_example.py` provides a first draft for generating stability plots.
