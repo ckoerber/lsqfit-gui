@@ -68,7 +68,7 @@ def test_03_update_prior(dash_duo, poly_fit_app):
     value_str = f"{value:1.2f}"
 
     # find element by xpath/placeholder is easier than by id because of dict
-    form = dash_duo.driver.find_element_by_xpath(f'//input[@placeholder="{key}-sdev"]')
+    form = dash_duo.driver.find_element(By.XPATH, f'//input[@placeholder="{key}-sdev"]')
     dash_duo.clear_input(form)
     form.send_keys(value_str)
     form.send_keys(Keys.RETURN)
@@ -85,7 +85,7 @@ def test_05_update_meta(dash_duo, poly_fit_app):
     n_poly_new = 5
 
     # find element by xpath/placeholder is easier than by id because of dict
-    form = dash_duo.driver.find_element_by_xpath('//input[@placeholder="n_poly"]')
+    form = dash_duo.driver.find_element(By.XPATH, '//input[@placeholder="n_poly"]')
     dash_duo.clear_input(form)
     form.send_keys(str(n_poly_new))
     form.send_keys(Keys.RETURN)
