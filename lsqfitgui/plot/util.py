@@ -17,7 +17,9 @@ LOG_MENU = dict(
                 method="relayout",
             ),
             dict(
-                args=[{"yaxis": {"type": "log"}}], label="Log Scale", method="relayout",
+                args=[{"yaxis": {"type": "log"}}],
+                label="Log Scale",
+                method="relayout",
             ),
         ]
     ),
