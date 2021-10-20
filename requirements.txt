@@ -3,5 +3,5 @@ pandas
 sympy
 plotly
 dash
-dash-bootstrap-components
+dash-bootstrap-components>=1.0.0
 PyYAML

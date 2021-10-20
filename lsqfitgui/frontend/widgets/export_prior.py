@@ -94,7 +94,7 @@ def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
                         dbc.Button(
                             "Close",
                             id="close-prior-button",
-                            className="ml-auto",
+                            className="ms-auto",
                             n_clicks=0,
                         )
                     ),

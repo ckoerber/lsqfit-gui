@@ -19,7 +19,7 @@ SIDEBAR_STYLE = {"overflow-y": "auto", "height": "100vh"}
 
 def get_float_widget(
     name: str, value: float, input_only: bool = False, **kwargs
-) -> dbc.FormGroup:
+) -> dbc.Row:
     """Create form group for float input."""
     inp = dbc.Input(
         type="number",
@@ -33,8 +33,8 @@ def get_float_widget(
     return (
         inp
         if input_only
-        else dbc.FormGroup(
-            [dbc.Label(name, html_for=f"input-prior-{name}"), inp],
+        else dbc.Row(
+            [dbc.Col(dbc.Label(name, html_for=f"input-prior-{name}")), dbc.Col(inp)],
             className="col-xs-6 col-sm-12 col-md-6 col-xl-3 col-xxl-2",
         )
     )
@@ -57,12 +57,11 @@ def get_sidebar(
             config["id"] = {"type": "meta", "name": name}
             config["value"] = meta_values[name]
             meta_elements.append(
-                dbc.FormGroup(
+                dbc.Row(
                     [
-                        dbc.Label(name, html_for=f"input-meta-{name}", width=4),
-                        dbc.Col(dbc.Input(**config), width=8),
+                        dbc.Col(dbc.Label(name, html_for=f"input-meta-{name}")),
+                        dbc.Col(dbc.Input(**config)),
                     ],
-                    row=True,
                 )
             )
         meta_elements.append(html.Hr())
@@ -78,7 +77,7 @@ def get_sidebar(
                 row_content = [
                     html.Td(
                         dbc.Label(html.Small(n), html_for=f"input-prior-{name}"),
-                        className="pl-4",
+                        className="ps-4",
                     ),
                     html.Td(
                         get_float_widget(f"{name}-mean", dist.mean, input_only=True)
@@ -130,10 +129,10 @@ def get_sidebar(
                             ),
                             dcc.Download(id="save-fit"),
                         ],
-                        className="ml-2",
+                        className="ms-2",
                     ),
                 ],
-                className="text-right",
+                className="text-end",
             ),
         ],
         style=SIDEBAR_STYLE,
