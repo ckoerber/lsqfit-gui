@@ -31,6 +31,5 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pwd
-        touch example/__init__.py
+        cd tests
         pytest --headless .
