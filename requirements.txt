@@ -1,7 +1,0 @@
-lsqfit
-pandas
-sympy
-plotly
-dash
-dash-bootstrap-components>=1.0.0
-PyYAML
