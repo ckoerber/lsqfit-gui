@@ -34,7 +34,10 @@ def poly_fit_app():
 def test_01_start_poly_fit_app(dash_duo, poly_fit_app):
     """Checks if it is possible to start the polyfit app and check title."""
     dash_duo.start_server(poly_fit_app)
-    assert dash_duo.find_element("h1").text == poly_fit_app.fit_gui.name
+    assert (
+        dash_duo.driver.find_element(By.TAG_NAME, "h1").text
+        == poly_fit_app.fit_gui.name
+    )
 
 
 def test_02_check_forms(dash_duo, poly_fit_app):
@@ -47,7 +50,7 @@ def test_02_check_forms(dash_duo, poly_fit_app):
         for kind, value in zip(("mean", "sdev"), (dist.mean, dist.sdev))
     ]
 
-    input_elements = dash_duo.driver.find_elements_by_tag_name("input")
+    input_elements = dash_duo.driver.find_elements(By.TAG_NAME, "input")
 
     forms = []
     for element in input_elements:
