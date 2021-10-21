@@ -50,7 +50,7 @@ def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True, **kwargs):
 
 def get_export_prior_widget(prior: Dict[str, GVar]) -> html.Div:
     """Create a modal which contains copyable strings for exporting the prior."""
-    prior = dict(**prior)
+    prior = {str(key): val for key, val in prior.items()}
     prior_json = json.dumps(prior, indent=4, cls=GVarEncoder)
     prior_gdumps = gdumps(prior, method="json")
     prior_yaml = gv_dict_to_yaml(prior, indent=4)

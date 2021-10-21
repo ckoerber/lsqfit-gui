@@ -13,27 +13,32 @@ def parse_function(string: str):
         function: Name of the module and function.
             Example `module.py:main`
     """
-    path, name = string.split(":")
-    spec = importlib.util.spec_from_file_location("fcn_src", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return getattr(module, name)
+    try:
+        path, name = string.split(":")
+        spec = importlib.util.spec_from_file_location("fcn_src", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return getattr(module, name)
+    except Exception:
+        return None
 
 
 def parse_function_expression(
     fcn: Callable, parameters: Dict, x_dict_keys: Optional[List[str]] = None
 ) -> str:
     """Parse the fit function and posteriror to latex label."""
-    expressions = {}
-    for key, val in parameters.items():
-        if hasattr(val, "__iter__"):
-            expr = sympy.symbols(" ".join([f"{key}{n}" for n, el in enumerate(val)]))
-        else:
-            expr = sympy.Symbol(key)
-
-        expressions[key] = expr
-
     try:
+        expressions = {}
+        for key, val in parameters.items():
+            if hasattr(val, "__iter__"):
+                expr = sympy.symbols(
+                    " ".join([f"{key}{n}" for n, el in enumerate(val)])
+                )
+            else:
+                expr = sympy.Symbol(key)
+
+            expressions[key] = expr
+
         xx = (
             sympy.Symbol("x")
             if x_dict_keys is None

@@ -82,7 +82,9 @@ def plot_gvar(
         else:
             raise KeyError(f"Does not know how to plot {kind}")
     else:
-        fig = fig or make_subplots(cols=1, rows=len(y), subplot_titles=list(y.keys()))
+        fig = fig or make_subplots(
+            cols=1, rows=len(y), subplot_titles=list(map(str, y.keys()))
+        )
 
         for n, (key, yy) in enumerate(y.items()):
             mean = gv.mean(y[key])

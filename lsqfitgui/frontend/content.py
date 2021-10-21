@@ -50,29 +50,34 @@ def document_function(
     if hasattr(fcn, "__doc__") and fcn.__doc__:
         documentation.append(html.Pre(html.Code(fcn.__doc__)))
 
-    source = getsource(fcn)
-    documentation.append(
-        html.Div(
-            [
-                html.Button(
-                    "Show source code",
-                    className="btn btn-outline-primary btn-small",
-                    id="collapse-function-source-button",
-                    n_clicks=0,
-                ),
-                dbc.Collapse(
-                    dbc.Card(
-                        dbc.CardBody(
-                            dcc.Markdown(f"```python\n{source}\n```"), className="p-4",
-                        ),
+    try:
+        source = getsource(fcn)
+    except Exception:
+        source = "Unable to load source"
+    finally:
+        documentation.append(
+            html.Div(
+                [
+                    html.Button(
+                        "Show source code",
+                        className="btn btn-outline-primary btn-small",
+                        id="collapse-function-source-button",
+                        n_clicks=0,
                     ),
-                    id="collapse-function-source",
-                    is_open=False,
-                ),
-            ],
-            className="py-4",
+                    dbc.Collapse(
+                        dbc.Card(
+                            dbc.CardBody(
+                                dcc.Markdown(f"```python\n{source}\n```"),
+                                className="p-4",
+                            ),
+                        ),
+                        id="collapse-function-source",
+                        is_open=False,
+                    ),
+                ],
+                className="py-4",
+            )
         )
-    )
 
     return documentation
 
