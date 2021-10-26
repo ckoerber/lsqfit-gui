@@ -3,6 +3,9 @@ import numpy as np
 import gvar as gv
 
 
+from lsqfit import nonlinear_fit
+from lsqfit._extras import chained_nonlinear_fit
+
 LOG_MENU = dict(
     type="dropdown",
     direction="down",
@@ -17,9 +20,7 @@ LOG_MENU = dict(
                 method="relayout",
             ),
             dict(
-                args=[{"yaxis": {"type": "log"}}],
-                label="Log Scale",
-                method="relayout",
+                args=[{"yaxis": {"type": "log"}}], label="Log Scale", method="relayout",
             ),
         ]
     ),
@@ -39,7 +40,12 @@ def get_fit_bands(fit):  # add type hint
     except Exception:
         x = fit.x
 
-    y = fit.fcn(x, fit.p)
+    if isinstance(fit, chained_nonlinear_fit):
+        y = fit.fcn(fit.p)
+    elif isinstance(fit, nonlinear_fit):
+        y = fit.fcn(fit.x, fit.p)
+    else:
+        raise ValueError(f"Did not understand fit input of type {type(fit)}")
 
     m = gv.mean(y)
     s = gv.sdev(y)
@@ -48,7 +54,12 @@ def get_fit_bands(fit):  # add type hint
 
 def get_residuals(fit):
     """Get residuals for fit."""
-    y_fit = fit.fcn(fit.x, fit.p)
+    if isinstance(fit, chained_nonlinear_fit):
+        y_fit = fit.fcn(fit.p)
+    elif isinstance(fit, nonlinear_fit):
+        y_fit = fit.fcn(fit.x, fit.p)
+    else:
+        raise ValueError(f"Did not understand fit input of type {type(fit)}")
 
     if not isinstance(fit.y, (dict, gv.BufferDict)):
         res = (gv.mean(fit.y) - y_fit) / gv.sdev(fit.y)
