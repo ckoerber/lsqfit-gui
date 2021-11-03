@@ -23,3 +23,4 @@ API: lsqfitgui
 ------------------
 
 .. autoclass:: FitGUI
+    :members:
