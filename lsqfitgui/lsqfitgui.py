@@ -73,7 +73,6 @@ class FitGUI:
                     fit_setup_kwargs=fit_setup_kwargs,
                     meta_config=meta_config
                 )
-                fit_gui.setup_app()
                 fit_gui.run_server(host=host, debug=debug, port=port)
         """  # noqa: E501
         self.name: str = None
@@ -203,6 +202,8 @@ class FitGUI:
 
     def run_server(self, *args, **kwargs):
         """Wrapper to self.app.run_server."""
+        if not self.app:
+            self.setup_app()
         return self.app.run_server(*args, **kwargs)
 
     # Callbacks
