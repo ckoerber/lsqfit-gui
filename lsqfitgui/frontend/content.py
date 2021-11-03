@@ -89,9 +89,14 @@ FCN_SOURCE_CALLBACK.args = (
     [State("collapse-function-source", "is_open")],
 )
 
+
 DEFAULT_PLOTS = [
     {"name": "Fit", "fcn": plot_fit},
-    {"name": "Residuals", "fcn": plot_residuals},
+    {
+        "name": "Residuals",
+        "fcn": plot_residuals,
+        "description": plot_residuals.description,
+    },
 ]
 """Plots which are added to the GUI by default."""
 
@@ -118,6 +123,7 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
                 "label": data.get("name", f"Figure {n}"),
                 "tab-value": f"figure-{n}",
                 "figure": fig,
+                "description": data.get("description"),
             }
         )
     return figure_data
@@ -157,7 +163,12 @@ def get_content(
             dcc.Tabs(
                 [
                     dcc.Tab(
-                        children=[dcc.Graph(figure=data["figure"])],
+                        children=[dcc.Graph(figure=data["figure"])]
+                        + (
+                            [html.P(data["description"])]
+                            if data.get("description")
+                            else []
+                        ),
                         label=data["label"],
                         value=data["tab-value"],
                     )

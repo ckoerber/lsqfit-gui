@@ -36,3 +36,6 @@ def plot_residuals(fit, fig: Optional[Figure] = None):
     fig.add_hline(0, line={"color": "black"})
 
     return fig
+
+
+plot_residuals.description = get_residuals.description
