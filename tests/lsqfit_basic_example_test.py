@@ -11,7 +11,7 @@ FIT_SETUP_KWARGS = {"n_exp": 4}
 
 
 @pytest.fixture
-def poly_fit():
+def basic_fit_gui():
     """Provide poly fit app without running it."""
     return run_server(
         name="lsqfit basic example",
@@ -22,7 +22,7 @@ def poly_fit():
     )
 
 
-def test_01_start_poly_fit_app(dash_duo, poly_fit):
+def test_01_start_poly_fit_app(dash_duo, basic_fit_gui):
     """Checks if it is possible to start the polyfit app and check title."""
-    dash_duo.start_server(poly_fit.app)
-    assert dash_duo.find_element("h1").text == poly_fit.name
+    dash_duo.start_server(basic_fit_gui.app)
+    assert dash_duo.find_element("h1").text == basic_fit_gui.name

@@ -7,14 +7,14 @@ from lsqfitgui import run_server
 
 
 @pytest.fixture
-def poly_fit_app():
+def stability_fit_gui():
     """Provide poly fit app without running it."""
     return run_server(
         name="lsqfit stability example", fit=generate_fit(), run_app=False,
     )
 
 
-def test_01_start_poly_fit_app(dash_duo, poly_fit_app):
+def test_01_start_poly_fit_app(dash_duo, stability_fit_gui):
     """Checks if it is possible to start the polyfit app and check title."""
-    dash_duo.start_server(poly_fit_app)
-    assert dash_duo.find_element("h1").text == poly_fit_app.fit_gui.name
+    dash_duo.start_server(stability_fit_gui.app)
+    assert dash_duo.find_element("h1").text == stability_fit_gui.name
