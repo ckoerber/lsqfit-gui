@@ -17,9 +17,7 @@ LOG_MENU = dict(
                 method="relayout",
             ),
             dict(
-                args=[{"yaxis": {"type": "log"}}],
-                label="Log Scale",
-                method="relayout",
+                args=[{"yaxis": {"type": "log"}}], label="Log Scale", method="relayout",
             ),
         ]
     ),
@@ -58,3 +56,20 @@ def get_residuals(fit):
             res[key] = (gv.mean(fit.y[key]) - val) / gv.sdev(fit.y[key])
 
     return res
+
+
+get_residuals.description = r"""The residuals are defined by
+$$
+\begin{aligned}
+    r_i(p) &= \frac{f_i(p) - y_i}{\Delta y_i}\,,&
+    \Delta r_i(p) &= \frac{\Delta f_i(p)}{\Delta y_i}
+\end{aligned}
+$$
+where \(f_i(p)\) is the result of the fit at each data location \(i\),
+\(y_i\) the corresponding data values, \(p\) the posterior,
+and \(\Delta\) denotes the standard deviation for respective objects.
+
+In other words, if central values distribute around one, the \(\chi^2\) per d.o.f.
+will be close to one; if errorbars are close to one,
+the posterior uncertainty mirrors the data uncertainty.
+"""
