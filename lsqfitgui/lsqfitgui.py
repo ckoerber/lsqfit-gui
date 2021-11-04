@@ -45,12 +45,15 @@ class FitGUI:
         meta_config: Optional[List[Dict]] = None,
         use_default_content: bool = True,
     ):
-        """To initialize this class, you must either provide a `fit` object or a `fit_setup_function` function.
+        """Initialize the fit gui.
+
+        You must either provide a `fit` object or a `fit_setup_function` function to initialize this class.
+        Note that this dose not create a ``Dash`` app; the app is created by calling :meth:`FitGUI.setup_app` (which is implicitly called by :meth:`FitGUI.run_server`).
 
         Arguments:
             fit: Non-linear fit object.
             fit_setup_function: Function which returns a non-linear fit object.
-                It's keywords are provided by `fit_setup_kwargs`.
+                Its keywords are provided by `fit_setup_kwargs`.
             fit_setup_kwargs: Initial kwargs which are passed to the `fit_setup_function` for creating the first fit object.
             meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
                 These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
@@ -182,10 +185,11 @@ class FitGUI:
     def setup_app(self, app: Optional[Dash] = None):
         """Initialize the dash app.
 
-        Sets up layout and callbacks.
+        Sets up layout and callbacks and create a ``Dash`` instance if not provided.
 
         Arguments:
             app: The dash app which runs the server.
+                If provided, requires to manually set up style sheets, scripts and assets.
 
         Raises RuntimeError if app already set up.
         """
@@ -293,7 +297,7 @@ def run_server(
         fit: Non-linear fit object.
         name: Name of the app displayed as title and browser tab title.
         fit_setup_function: Function which returns a non-linear fit object.
-            It's keywords are provided by `fit_setup_kwargs`.
+            Its keywords are provided by `fit_setup_kwargs`.
         fit_setup_kwargs: Initial kwargs which are passed to the `fit_setup_function` for creating the first fit object.
         meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
             These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.

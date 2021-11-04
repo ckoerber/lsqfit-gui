@@ -15,7 +15,7 @@ and visiting <http://localhost:8000>.
 
 ## First steps
 
-### Launching the dash board via script
+### Launching the dashboard via script
 
 In the most simple case, `lsqfitgui` requires a [`lsqfit.nonlinear_fit` object](https://lsqfit.readthedocs.io/en/latest/lsqfit.html#nonlinear-fit-objects) as its only argument.
 
@@ -44,9 +44,9 @@ run_server(fit)
 ```
 Running `python my_fit.py` launches the dashboard locally at <http://localhost:8000>.
 
-This GUI allows to vary prior parameters (mean and standard deviations) as well as inspecting their effects on the fit.
+This GUI allows for varying prior parameters (mean and standard deviations) and inspecting their effects on the fit.
 
-### Launching the dashboard via cli
+### Launching the dashboard via CLI
 
 Additionally, for a dumped fit object
 ```python
@@ -62,7 +62,7 @@ lsqfitgui --function my_fit.py:fcn fit.p
 
 ## Meta parameters
 
-For some fits, you may not only want to vary the prior parameters, but also entirely change the model (or data).
+For some fits, you may not only want to vary the prior parameters but also entirely change the model (or data).
 This is done by the providing a `fit_setup_function` and respective configuration to the {func}`lsqfitgui.run_server` method.
 
 ```python
@@ -108,9 +108,9 @@ run_server(
 
 ```{note}
 You can provide more than just one meta setup parameter of arbitrary type.
-These parameters can have any type allowed to be parsed from html widgets.
+These parameters can have any type allowed to be parsed from HTML widgets.
 You can find more details about allowed ``meta_config`` parameters at the [``dcc.Input`` documentation](https://dash.plotly.com/dash-core-components/input#input-properties).
-Note that the ``id`` of the widget is automatically provided by the ``name`` keyword from the ``meta_config`` dictionary; which must match the ``fit_setup_kwargs`` keyword as well as the ``generate_fit`` keyword.).
+Note that the ``id`` of the widget is automatically provided by the ``name`` keyword from the ``meta_config`` dictionary, which must match the ``fit_setup_kwargs`` keyword and the ``generate_fit`` keyword.).
 ```
 
 
@@ -134,9 +134,9 @@ run_server(
     additional_plots=additional_plots,
 )
 ```
-Plots provided by this method will be added to the already existing plots container.
+This method adds plots to the already existing plots container.
 
-For convenience, we have also added methods for creating figures dircectly from ``gvars``.
+For convenience, we have also added methods for creating figures directly from ``gvars``.
 For example, if you want to add a custom function ``my_func`` to the plot, you can add the lines
 ```python
 from lsqfitgui import plot_gvar
@@ -151,7 +151,7 @@ def plot_my_func(fit):
 
 additional_plots = [{"name": "My function", "fcn": plot_log_log}]
 ```
-Additionally, if you have a function which already takes `x` and `p` arguments as the fit function of the `nonlinear_fit` object, you can use
+Additionally, if you have a function that already takes `x` and `p` arguments as the fit function of the `nonlinear_fit` object, you can use
 ```python
 from lsqfitgui import wrap_plot_gvar
 
@@ -169,7 +169,7 @@ which does effectively the same thing.
 
 ### Additional kwargs
 
-The ``additional_plots`` list allows also dictionaries with more keyword arguments.
+The ``additional_plots`` list also allows dictionaries with more keyword arguments.
 Allowed are
 
 * **name** *(str)*: The name presented in the tabs.

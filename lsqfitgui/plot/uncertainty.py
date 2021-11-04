@@ -31,16 +31,16 @@ def wrap_plot_gvar(
     add_log_menu: bool = False,
     scatter_kwargs: Optional[Dict] = None,
 ) -> Callable[[nonlinear_fit], go.Figure]:
-    """Wraps functions taking `x` and `p` arguments such that they can be used by the :attr:`lsqfitgui.FitGUI.plots` to generate plots of gvars.
+    """Wraps functions taking ``x`` and ``p`` arguments such that they can be used by the :attr:`lsqfitgui.FitGUI.plots` to generate plots of gvars.
 
     Arguments:
-        kind: Allowed values: "band", "errorbar".
-            Returned figure will contain errorbars or errorbands.
-        add_log_menu: Should the returned figure have an menu allowing to change from regular to log y-axis?
-        scatter_kwargs: Keyword arguments passed to go.Scatter().
+        kind: Allowed values: ``"band"``, ``"errorbar"``.
+            Returned figure will contain error bars or error bands.
+        add_log_menu: Should the returned figure have a menu allowing to change from regular to log y-axis?
+        scatter_kwargs: Keyword arguments passed to ``go.Scatter()``.
 
     Example:
-        The code below presents how to use the wrapper to add new plots to the gui::
+        The code below presents how to use the wrapper to add new plots to the GUI::
 
             def fcn(x, p):
                 yy = ...
@@ -96,14 +96,14 @@ def plot_gvar(
     Arguments:
         x: The independent variable.
             Can be either an array or a dictionary of arrays where keys must match the keys of the dependent variable.
-            If `kind="band"`, tries to interpolate the values.
+            If ``kind="band"``, tries to interpolate the values.
         y: The dependent variable.
-            If it is a dictionary of gvar arrays, the figure will contain several sub figures.
+            If it is a dictionary of gvar arrays, the figure will contain several subfigures.
         fig: Figure to add traces to. If not specified, creates a new figure.
-        kind: Either "band" or "errorbars".
+        kind: Either ``"band"`` or ``"errorbars"``.
         add_log_menu: Add a menu to switch from a linear to a log scale.
-            Only available if `y` is not a dictionary.
-        scatter_kwargs: Keyword arguments passed to `go.Scatter`.
+            Only available if ``y`` is not a dictionary.
+        scatter_kwargs: Keyword arguments passed to ``go.Scatter``.
     """  # noqa: E501
     fig_was_none = fig is None
     scatter_kwargs = scatter_kwargs or {}
@@ -227,5 +227,11 @@ def plot_band(
     )
     scatter_kwargs["showlegend"] = False
     fig.add_trace(
-        go.Scatter(x=x, y=y_mean, mode="lines", **scatter_kwargs,), **trace_kwargs,
+        go.Scatter(
+            x=x,
+            y=y_mean,
+            mode="lines",
+            **scatter_kwargs,
+        ),
+        **trace_kwargs,
     )
