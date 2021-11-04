@@ -105,6 +105,7 @@ class FitGUI:
 
         * **name** *(str)*: The name presented in the tabs.
         * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
+        * **description** *(str)*: Text displayed below figure (can contain latex using).
         * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
         * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
 

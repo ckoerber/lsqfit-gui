@@ -159,7 +159,11 @@ from lsqfitgui import wrap_plot_gvar
 def plot_my_func_wrapped(x, p):
     return my_func(x, p)
 
-additional_plots = [{"name": "My function", "fcn": plot_my_func_wrapped}]
+additional_plots = [{
+    "name": "My function",
+    "fcn": plot_my_func_wrapped,
+    "description": "This figure displays my function.", # optional
+}]
 ```
 which does effectively the same thing.
 
