@@ -14,6 +14,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import lsqfitgui
+
 # -- Project information -----------------------------------------------------
 
 project = "lsqfitgui"
@@ -21,7 +23,7 @@ copyright = "2021, @ckoerber, @millernb"
 author = "@ckoerber, @millernb"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1"
+release = lsqfitgui.__version__
 
 
 # -- General configuration ---------------------------------------------------

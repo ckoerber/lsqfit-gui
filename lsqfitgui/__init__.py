@@ -7,5 +7,6 @@ The :func:`wrap_plot_gvar` and :func:`plot_gvar` methods can be used to generate
 """  # noqa: E501
 from lsqfitgui.lsqfitgui import FitGUI, run_server  # noqa
 from lsqfitgui.plot.uncertainty import wrap_plot_gvar, plot_gvar  # noqa
+from lsqfitgui.version import __version__  # noqa
 
-__all__ = ["FitGUI", "run_server", "wrap_plot_gvar", "plot_gvar"]
+__all__ = ["FitGUI", "run_server", "wrap_plot_gvar", "plot_gvar", "__version__"]
