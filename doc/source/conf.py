@@ -65,6 +65,18 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "collapse_navigation": False,
     "show_toc_level": 2,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/ckoerber/lsqfit-gui",
+            "icon": "fab fa-github",
+        },
+        {
+            "name": "Feedback",
+            "url": "https://github.com/ckoerber/lsqfit-gui/issues/new",
+            "icon": "fa fa-comments",
+        },
+    ],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
