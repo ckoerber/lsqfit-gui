@@ -285,7 +285,7 @@ def run_server(
     debug: bool = True,
     host: str = "localhost",
     port: int = 8000,
-) -> Dash:
+) -> FitGUI:
     """Initialize the GUI and start the dash app.
 
     Requires either a `fit` object or a `fit_setup_function`.
@@ -324,7 +324,7 @@ def run_server(
             fit_setup_kwargs = {"n_exp": 3}
             meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
 
-            app = run_server(
+            fit_gui = run_server(
                 fit_setup_function=generate_fit,
                 fit_setup_kwargs=fit_setup_kwargs,
                 meta_config=meta_config
