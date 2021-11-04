@@ -5,7 +5,6 @@ The :func:`run_server` method provides a convinient interafce which also starts 
 """  # noqa: E501
 from typing import Optional, Callable, Dict, List, Any
 
-import os
 from tempfile import NamedTemporaryFile
 
 from numpy import eye, allclose
