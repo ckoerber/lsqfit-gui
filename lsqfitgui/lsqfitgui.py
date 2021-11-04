@@ -8,9 +8,10 @@ from typing import Optional, Callable, Dict, List, Any
 import os
 from tempfile import NamedTemporaryFile
 
+from numpy import eye, allclose
 from gvar import dumps, evalcorr
 from lsqfit import nonlinear_fit
-from numpy import eye, allclose
+from lsqfit._extras import unchained_nonlinear_fit
 
 from dash import Dash, html, dcc
 
@@ -26,6 +27,10 @@ from lsqfitgui.frontend.dashboard import (
     EXPORT_PRIOR_CALLBACK_ARGS,
     FCN_SOURCE_CALLBACK,
     DEFAULT_PLOTS,
+)
+from lsqfitgui.util.models import (
+    lsqfit_from_multi_model_fit,
+    lsqfit_from_multi_model_fit_wrapper,
 )
 
 
@@ -103,6 +108,7 @@ class FitGUI:
 
         * **name** *(str)*: The name presented in the tabs.
         * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
+        * **description** *(str)*: Text displayed below figure (can contain latex using).
         * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
         * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
 
@@ -121,6 +127,13 @@ class FitGUI:
             self._initial_fit = fit_setup_function(**self._fit_setup_kwargs)
         else:
             self._initial_fit = fit
+
+        if isinstance(self._initial_fit, unchained_nonlinear_fit):
+            self._initial_fit = lsqfit_from_multi_model_fit(self._initial_fit)
+            if self._fit_setup_function is not None:
+                self._fit_setup_function = lsqfit_from_multi_model_fit_wrapper(
+                    self._fit_setup_function
+                )
 
         if not allclose(
             evalcorr(self.initial_fit.prior.flatten()),

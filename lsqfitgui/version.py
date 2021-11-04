@@ -1,3 +1,8 @@
 """Version infos."""
+import os
 
-__version__ = "0.0.1"
+_VERSION_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "_version.txt"))
+
+
+with open(_VERSION_FILE) as inp:
+    __version__ = inp.read().strip()

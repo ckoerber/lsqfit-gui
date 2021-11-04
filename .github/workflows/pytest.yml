@@ -1,0 +1,31 @@
+name: Run headless pytest
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches:
+        - master
+        - 'v*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    services:
+      selenium:
+        image: selenium/standalone-chrome
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install package
+      run: |
+        pip install .[test]
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest --headless .

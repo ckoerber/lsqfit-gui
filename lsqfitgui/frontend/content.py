@@ -50,29 +50,34 @@ def document_function(
     if hasattr(fcn, "__doc__") and fcn.__doc__:
         documentation.append(html.Pre(html.Code(fcn.__doc__)))
 
-    source = getsource(fcn)
-    documentation.append(
-        html.Div(
-            [
-                html.Button(
-                    "Show source code",
-                    className="btn btn-outline-primary btn-small",
-                    id="collapse-function-source-button",
-                    n_clicks=0,
-                ),
-                dbc.Collapse(
-                    dbc.Card(
-                        dbc.CardBody(
-                            dcc.Markdown(f"```python\n{source}\n```"), className="p-4",
-                        ),
+    try:
+        source = getsource(fcn)
+    except Exception:
+        source = "Unable to load source"
+    finally:
+        documentation.append(
+            html.Div(
+                [
+                    html.Button(
+                        "Show source code",
+                        className="btn btn-outline-primary btn-small",
+                        id="collapse-function-source-button",
+                        n_clicks=0,
                     ),
-                    id="collapse-function-source",
-                    is_open=False,
-                ),
-            ],
-            className="py-4",
+                    dbc.Collapse(
+                        dbc.Card(
+                            dbc.CardBody(
+                                dcc.Markdown(f"```python\n{source}\n```"),
+                                className="p-4",
+                            ),
+                        ),
+                        id="collapse-function-source",
+                        is_open=False,
+                    ),
+                ],
+                className="py-4",
+            )
         )
-    )
 
     return documentation
 
@@ -89,9 +94,14 @@ FCN_SOURCE_CALLBACK.args = (
     [State("collapse-function-source", "is_open")],
 )
 
+
 DEFAULT_PLOTS = [
     {"name": "Fit", "fcn": plot_fit},
-    {"name": "Residuals", "fcn": plot_residuals},
+    {
+        "name": "Residuals",
+        "fcn": plot_residuals,
+        "description": plot_residuals.description,
+    },
 ]
 """Plots which are added to the GUI by default."""
 
@@ -118,6 +128,7 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
                 "label": data.get("name", f"Figure {n}"),
                 "tab-value": f"figure-{n}",
                 "figure": fig,
+                "description": data.get("description"),
             }
         )
     return figure_data
@@ -157,7 +168,12 @@ def get_content(
             dcc.Tabs(
                 [
                     dcc.Tab(
-                        children=[dcc.Graph(figure=data["figure"])],
+                        children=[dcc.Graph(figure=data["figure"])]
+                        + (
+                            [html.P(data["description"])]
+                            if data.get("description")
+                            else []
+                        ),
                         label=data["label"],
                         value=data["tab-value"],
                     )
