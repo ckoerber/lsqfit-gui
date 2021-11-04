@@ -1,4 +1,8 @@
-"""Lsqfit GUI."""
+"""This module provides interfaces for running a lsqfit dashboard GUI.
+
+The :class:`FitGUI` class provides the interface to `lsqfit` providing dynamic html elements which can be embedded into a dash (flask) app.
+The :func:`run_server` method provides a convinient interafce which also starts the Dash app which is accessible by any (local) browser.
+"""  # noqa: E501
 from typing import Optional, Callable, Dict, List, Any
 
 import os
@@ -28,25 +32,79 @@ from lsqfitgui.frontend.dashboard import (
 class FitGUI:
     """Class which initializes the dashboard."""
 
-    plot_fcns = {}
-
-    def __init__(
+    def __init__(  # ignore: D107
         self,
-        fit: Optional[Dict] = None,
+        fit: Optional[nonlinear_fit] = None,
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
         use_default_content: bool = True,
     ):
-        """Initialize the GUI."""
-        self.name = None
+        """To initialize this class, you must either provide a `fit` object or a `fit_setup_function` function.
+
+        Arguments:
+            fit: Non-linear fit object.
+            fit_setup_function: Function which returns a non-linear fit object.
+                It's keywords are provided by `fit_setup_kwargs`.
+            fit_setup_kwargs: Initial kwargs which are passed to the `fit_setup_function` for creating the first fit object.
+            meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
+                These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
+            use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
+
+        Example:
+            The most basic example just requires a nonlinear_fit object::
+
+                fit = lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+                gui = FitGUI(fit)
+
+            More sophisticated examples, where also meta arguments are used, are::
+
+                def generate_fit(n_exp=3):
+                    ...
+                    return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+
+                fit_setup_kwargs = {"n_exp": 3}
+                meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
+
+                gui = FitGUI(
+                    fit_setup_function=generate_fit,
+                    fit_setup_kwargs=fit_setup_kwargs,
+                    meta_config=meta_config
+                )
+        """  # noqa: E501
+        self.name: str = None
+        """Name of the app displayed as title and browser tab title."""
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
         self._use_default_content = use_default_content
-        self.get_additional_content = None
-        self.plots = []
         self._layout = None
+
+        self.get_additional_content: Callable[[nonlinear_fit], html.Base] = None
+        """Function used to determine dynamic content depending on fit results."""
+
+        self.plots: List[Dict[str, Any]] = []
+        """List of dictionaries specifying plots rendered in the tab element.
+        Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
+
+        Example:
+            Plot the fit results::
+
+                def plot_fcn(fit):
+                    yy = fit.fcn(fit.x, fit.p)
+                    return plot_gvar(fit.x, yy, kind="band")
+
+                gui.plots.append({"name": "Fit results", "fcn": plot_fcn})
+
+        **Allowed keywords are**
+
+        * **name** *(str)*: The name presented in the tabs.
+        * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
+        * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
+        * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
+
+        See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
+        """  # noqa: E501
 
         if self._use_default_content:
             self.plots += DEFAULT_PLOTS
@@ -80,17 +138,17 @@ class FitGUI:
         self._fit = self.initial_fit
 
     @property
-    def fit(self):
+    def fit(self) -> nonlinear_fit:
         """Return current fit object."""
         return self._fit
 
     @property
-    def initial_fit(self):
-        """Return current fit object."""
+    def initial_fit(self) -> nonlinear_fit:
+        """Return fit object used to initialize the app."""
         return self._initial_fit
 
     @property
-    def layout(self):
+    def layout(self) -> html.Base:
         """Return the current layout."""
         if self._layout is None:
             self._layout = get_layout(
@@ -104,8 +162,14 @@ class FitGUI:
             )
         return self._layout
 
-    def setup(self, app):
-        """Initialize the dash app."""
+    def setup(self, app: Dash):
+        """Initialize the dash app.
+
+        Sets up layout and callbacks.
+
+        Arguments:
+            app: The dash app which runs the server.
+        """
         app.title = self.name
         app.layout = html.Div(children=self.layout, id="body")
         for callback in self._callbacks:
@@ -167,17 +231,61 @@ class FitGUI:
 def run_server(
     fit: Optional[nonlinear_fit] = None,
     name: str = "Lsqfit GUI",
-    debug: bool = True,
     fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    run_app: bool = True,
     additional_plots: Optional[Dict[str, Callable]] = None,
-    **kwargs,
+    run_app: bool = True,
+    debug: bool = True,
+    host: str = "localhost",
+    port: int = 8000,
 ) -> Dash:
-    """Provide dashboard for lsqfitgui."""
+    """Initialize the GUI and start the dash app.
+
+    Requires either a `fit` object or a `fit_setup_function`.
+
+    Arguments:
+        fit: Non-linear fit object.
+        name: Name of the app displayed as title and browser tab title.
+        fit_setup_function: Function which returns a non-linear fit object.
+            It's keywords are provided by `fit_setup_kwargs`.
+        fit_setup_kwargs: Initial kwargs which are passed to the `fit_setup_function` for creating the first fit object.
+        meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
+            These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
+        use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
+        get_additional_content: Function used to determine dynamic content depending on fit results.
+        additional_plots: List of dictionaries specifying plots rendered in the tab element.
+            Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
+            This populates :attr:`FitGUI.plots`.
+            See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
+        run_app: Call run server on the dash app.
+        debug: Run the dash app in debug mode. Only used if `run_app=True`.
+        host: The hosting address of the dash app. Only used if `run_app=True`.
+        port: The port of the dash app. Only used if `run_app=True`.
+
+    Example:
+        The most basic example just requires a nonlinear_fit object::
+
+            fit = lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+            app = run_server(fit)
+
+        More sophisticated examples, where also meta arguments are used, are::
+
+            def generate_fit(n_exp=3):
+                ...
+                return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
+
+            fit_setup_kwargs = {"n_exp": 3}
+            meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
+
+            app = run_server(
+                fit_setup_function=generate_fit,
+                fit_setup_kwargs=fit_setup_kwargs,
+                meta_config=meta_config
+            )
+    """  # noqa: E501
     fit_gui = FitGUI(
         fit=fit,
         fit_setup_function=fit_setup_function,
@@ -199,5 +307,5 @@ def run_server(
 
     fit_gui.setup(app)
     if run_app:
-        app.run_server(debug=debug)
+        app.run_server(host=host, debug=debug, port=port)
     return app
