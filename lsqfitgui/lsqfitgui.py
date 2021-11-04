@@ -5,7 +5,6 @@ The :func:`run_server` method provides a convinient interafce which also starts 
 """  # noqa: E501
 from typing import Optional, Callable, Dict, List, Any
 
-import os
 from tempfile import NamedTemporaryFile
 
 from numpy import eye, allclose
@@ -22,6 +21,7 @@ from lsqfitgui.frontend.dashboard import (
     toggle_prior_widget,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
+    ASSETS,
     UPDATE_LAYOUT_CALLBACK_ARGS,
     SAVE_FIT_CALLBACK_ARGS,
     EXPORT_PRIOR_CALLBACK_ARGS,
@@ -64,6 +64,8 @@ class FitGUI:
 
             More sophisticated examples, where also meta arguments are used, are::
 
+                from dash import Dash
+
                 def generate_fit(n_exp=3):
                     ...
                     return lsqfit.nonlinear_fit(data, fcn=fcn, prior=prior)
@@ -76,6 +78,7 @@ class FitGUI:
                     fit_setup_kwargs=fit_setup_kwargs,
                     meta_config=meta_config
                 )
+                fit_gui.run_server(host=host, debug=debug, port=port)
         """  # noqa: E501
         self.name: str = None
         """Name of the app displayed as title and browser tab title."""
@@ -149,6 +152,7 @@ class FitGUI:
         self._prior_keys_old = None
         self._prior_values_old = None
         self._fit = self.initial_fit
+        self._app = None
 
     @property
     def fit(self) -> nonlinear_fit:
@@ -175,19 +179,45 @@ class FitGUI:
             )
         return self._layout
 
-    def setup(self, app: Dash):
+    def setup_app(self, app: Optional[Dash] = None):
         """Initialize the dash app.
 
         Sets up layout and callbacks.
 
         Arguments:
             app: The dash app which runs the server.
+
+        Raises RuntimeError if app already set up.
         """
+        if self._app is not None:
+            raise RuntimeError("App already initialized.")
+
+        if not app:
+            app = Dash(
+                self.name,
+                external_stylesheets=EXTERNAL_STYLESHEETS,
+                external_scripts=EXTERNAL_SCRIPTS,
+                assets_folder=ASSETS,
+            )
+
         app.title = self.name
         app.layout = html.Div(children=self.layout, id="body")
         for callback in self._callbacks:
             kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
             app.callback(*callback.args, **kwargs)(callback)
+
+        self._app = app
+
+    @property
+    def app(self) -> Dash:
+        """Return plotly dash app."""
+        return self._app
+
+    def run_server(self, *args, **kwargs):
+        """Wrapper to self.app.run_server."""
+        if not self.app:
+            self.setup_app()
+        return self.app.run_server(*args, **kwargs)
 
     # Callbacks
 
@@ -254,7 +284,7 @@ def run_server(
     debug: bool = True,
     host: str = "localhost",
     port: int = 8000,
-) -> Dash:
+) -> FitGUI:
     """Initialize the GUI and start the dash app.
 
     Requires either a `fit` object or a `fit_setup_function`.
@@ -293,7 +323,7 @@ def run_server(
             fit_setup_kwargs = {"n_exp": 3}
             meta_config = [{"name": "n_exp", "type": "number", "min": 1, "max": 10, "step": 1}]
 
-            app = run_server(
+            fit_gui = run_server(
                 fit_setup_function=generate_fit,
                 fit_setup_kwargs=fit_setup_kwargs,
                 meta_config=meta_config
@@ -309,16 +339,7 @@ def run_server(
     fit_gui.name = name
     fit_gui.get_additional_content = get_additional_content
     fit_gui.plots += additional_plots or []
-
-    app = Dash(
-        name,
-        external_stylesheets=EXTERNAL_STYLESHEETS,
-        external_scripts=EXTERNAL_SCRIPTS,
-        assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
-    )
-    app.fit_gui = fit_gui
-
-    fit_gui.setup(app)
+    fit_gui.setup_app()
     if run_app:
-        app.run_server(host=host, debug=debug, port=port)
-    return app
+        fit_gui.run_server(host=host, debug=debug, port=port)
+    return fit_gui

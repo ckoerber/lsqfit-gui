@@ -1,5 +1,6 @@
 """Provides dashboard for lsqfitgui."""
 from typing import Optional, Dict, Any, Callable, List
+from os import path
 
 from dash import html
 from dash.dependencies import Input, Output
@@ -82,6 +83,7 @@ MATHJAX_CDN = (
 
 
 EXTERNAL_SCRIPTS = [{"type": "text/javascript", "src": MATHJAX_CDN}]
+ASSETS = path.abspath(path.join(path.dirname(path.dirname(__file__)), "assets"))
 
 UPDATE_LAYOUT_CALLBACK_ARGS = (
     Output("body", "children"),
