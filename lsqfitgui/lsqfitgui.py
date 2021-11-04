@@ -22,6 +22,7 @@ from lsqfitgui.frontend.dashboard import (
     toggle_prior_widget,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
+    ASSETS,
     UPDATE_LAYOUT_CALLBACK_ARGS,
     SAVE_FIT_CALLBACK_ARGS,
     EXPORT_PRIOR_CALLBACK_ARGS,
@@ -197,7 +198,7 @@ class FitGUI:
                 self.name,
                 external_stylesheets=EXTERNAL_STYLESHEETS,
                 external_scripts=EXTERNAL_SCRIPTS,
-                assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
+                assets_folder=ASSETS,
             )
 
         app.title = self.name
