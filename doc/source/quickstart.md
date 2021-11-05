@@ -2,11 +2,17 @@
 
 ## Install
 
-To install the package and its dependencies, run
-```
+To install the package and its dependencies, clone the repository and run the following command in the repository root directory
+```bash
 pip install --upgrade numpy scipy
 pip install [-e] .
 ```
+or equivalently _(let pip do the cloning)_
+```bash
+pip install --upgrade numpy scipy
+pip install git+https://github.com/ckoerber/lsqfit-gui@master
+```
+
 _(`lsqfit` and `gvar` require `numpy` and `scipy` as build dependencies. Installing these packages before install `gvar` ensures a smooth installation.)_
 
 ## Usage
