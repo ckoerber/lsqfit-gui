@@ -148,8 +148,9 @@ class FitGUI:
             self._update_layout_callback,
             self._save_fit_callback,
             self._export_prior_callback,
-            FCN_SOURCE_CALLBACK,
         ]
+        if self._use_default_content:
+            self._callbacks += [FCN_SOURCE_CALLBACK]
 
         self._setup_old = list(self._fit_setup_kwargs.values())
         self._prior_keys_old = None

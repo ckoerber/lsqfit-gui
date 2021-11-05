@@ -51,16 +51,22 @@ def get_sidebar(
         for config in meta_config:
             config = config.copy()
             name = config.pop("name")
-            config["debounce"] = True
-            config["placeholder"] = name
-            config["className"] = "form-control-sm"
             config["id"] = {"type": "meta", "name": name}
             config["value"] = meta_values[name]
+
+            if "options" in config:
+                inp = dbc.Select(**config)
+            else:
+                config["className"] = "form-control-sm"
+                config["debounce"] = True
+                config["placeholder"] = name
+                inp = dbc.Input(**config)
+
             meta_elements.append(
                 dbc.Row(
                     [
                         dbc.Col(dbc.Label(name, html_for=f"input-meta-{name}")),
-                        dbc.Col(dbc.Input(**config)),
+                        dbc.Col(inp),
                     ],
                 )
             )
