@@ -24,7 +24,13 @@ def process_priors(prior_flat, initial_fit):
         else:
             prior[key] = gv.gvar(prior_flat[f"{key}-mean"], prior_flat[f"{key}-sdev"])
 
-    return nonlinear_fit(initial_fit.data, initial_fit.fcn, prior)
+    fit = nonlinear_fit(initial_fit.data, initial_fit.fcn, prior)
+
+    for attr in ["models", "meta"]:
+        if hasattr(initial_fit, attr):
+            setattr(fit, attr, getattr(initial_fit, attr))
+
+    return fit
 
 
 def process_meta(meta_array, meta_config):
