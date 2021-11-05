@@ -53,7 +53,8 @@ def plot_residuals(fit, fig: Optional[Figure] = None):
     fig = plot_gvar(
         fit.x, residuals, kind="errorbars", scatter_kwargs={"name": "Residuals"}
     )
-    fig.add_hline(0, line={"color": "black"})
+    fig.add_hline(0, line_width=1, line_dash="dash", line_color="gray")
+    fig.add_hrect(-1, 1, line_width=0, fillcolor="gray", opacity=0.2)
 
     return fig
 
