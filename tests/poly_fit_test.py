@@ -19,7 +19,7 @@ FIT_SETUP_KWARGS = {"n_poly": 4}
 
 
 @pytest.fixture
-def poly_fit_app():
+def poly_fit_gui():
     """Provide poly fit app without running it."""
     return run_server(
         name="Poly fit",
@@ -31,22 +31,19 @@ def poly_fit_app():
     )
 
 
-def test_01_start_poly_fit_app(dash_duo, poly_fit_app):
+def test_01_start_poly_fit_app(dash_duo, poly_fit_gui):
     """Checks if it is possible to start the polyfit app and check title."""
-    dash_duo.start_server(poly_fit_app)
-    assert (
-        dash_duo.driver.find_element(By.TAG_NAME, "h1").text
-        == poly_fit_app.fit_gui.name
-    )
+    dash_duo.start_server(poly_fit_gui.app)
+    assert dash_duo.find_element("h1").text == poly_fit_gui.name
 
 
-def test_02_check_forms(dash_duo, poly_fit_app):
+def test_02_check_forms(dash_duo, poly_fit_gui):
     """Checks if all forms are present and have values as expected."""
-    dash_duo.start_server(poly_fit_app)
+    dash_duo.start_server(poly_fit_gui.app)
 
     expected_forms = [("meta", "n_poly", str(FIT_SETUP_KWARGS["n_poly"]))] + [
         ("prior", f"{key}-{kind}", str(value))
-        for key, dist in poly_fit_app.fit_gui.fit.prior.items()
+        for key, dist in poly_fit_gui.fit.prior.items()
         for kind, value in zip(("mean", "sdev"), (dist.mean, dist.sdev))
     ]
 
@@ -60,11 +57,11 @@ def test_02_check_forms(dash_duo, poly_fit_app):
     assert expected_forms == forms
 
 
-def test_03_update_prior(dash_duo, poly_fit_app):
+def test_03_update_prior(dash_duo, poly_fit_gui):
     """Checks if updating the prior updates the fit."""
-    dash_duo.start_server(poly_fit_app)
+    dash_duo.start_server(poly_fit_gui.app)
 
-    initial_fit = poly_fit_app.fit_gui.initial_fit
+    initial_fit = poly_fit_gui.initial_fit
 
     key = list(initial_fit.prior.keys())[0]
     value = initial_fit.prior[key].sdev + 1
@@ -78,12 +75,12 @@ def test_03_update_prior(dash_duo, poly_fit_app):
     # There is proably a better way for doing this...
     sleep(1)
 
-    assert poly_fit_app.fit_gui.fit.prior[key].sdev == value
+    assert poly_fit_gui.fit.prior[key].sdev == value
 
 
-def test_05_update_meta(dash_duo, poly_fit_app):
+def test_05_update_meta(dash_duo, poly_fit_gui):
     """Checks if updating the meta updates the fit."""
-    dash_duo.start_server(poly_fit_app)
+    dash_duo.start_server(poly_fit_gui.app)
 
     n_poly_new = 5
 
@@ -99,4 +96,4 @@ def test_05_update_meta(dash_duo, poly_fit_app):
         )
     )
 
-    assert len(poly_fit_app.fit_gui.fit.prior) == n_poly_new
+    assert len(poly_fit_gui.fit.prior) == n_poly_new

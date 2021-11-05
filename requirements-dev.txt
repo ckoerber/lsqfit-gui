@@ -1,0 +1,6 @@
+dash[testing]
+pytest
+black
+sphinx
+pydata-sphinx-theme
+myst-parser
