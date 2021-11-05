@@ -82,12 +82,12 @@ def document_function(
     return documentation
 
 
-def toggle_function_source_collapse(n, is_open):
+def _toggle_function_source_collapse(n, is_open):
     """Toggles the source code of the function."""
     return not is_open if n else is_open
 
 
-FCN_SOURCE_CALLBACK = toggle_function_source_collapse
+FCN_SOURCE_CALLBACK = _toggle_function_source_collapse
 FCN_SOURCE_CALLBACK.args = (
     Output("collapse-function-source", "is_open"),
     [Input("collapse-function-source-button", "n_clicks")],
@@ -98,6 +98,7 @@ DEFAULT_PLOTS = [
     {"name": "Fit", "fcn": plot_fit},
     {"name": "Residuals", "fcn": plot_residuals},
 ]
+"""Plots which are added to the GUI by default."""
 
 
 def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):

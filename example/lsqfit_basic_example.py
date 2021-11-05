@@ -2,12 +2,12 @@
 
 See also https://lsqfit.readthedocs.io/en/latest/overview.html#basic-fits
 """
-
-import lsqfitgui
-from lsqfitgui.plot.uncertainty import wrap_plot_gvar, plot_gvar
 import lsqfit
 import numpy as np
 import gvar as gv
+
+from lsqfitgui import run_server, wrap_plot_gvar, plot_gvar
+
 
 """
 # An even more basic example; comment-out the other main() instead
@@ -28,7 +28,7 @@ def main():
     y_eff_mass = np.log(y / np.roll(y, -1)) / dx
     y_eff_wf = np.exp(y_eff_mass * x) * y
 
-    lsqfitgui.run_server(
+    run_server(
         fit_setup_function=generate_fit,
         fit_setup_kwargs={"n_exp": 4},
         meta_config=[
