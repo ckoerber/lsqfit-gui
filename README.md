@@ -1,3 +1,4 @@
+[![Documentation Status](https://readthedocs.org/projects/lsqfitgui/badge/?version=latest)](https://lsqfitgui.readthedocs.io/en/latest/?badge=latest)
 # Lsqfit GUI
 
 Graphical user interface for `lsqfit` using `dash`.
@@ -6,9 +7,10 @@ Graphical user interface for `lsqfit` using `dash`.
 
 ## Install
 
-Run
+Run the following commands in the repository root directory
 ```
-pip install [-e] .
+pip install --upgrade numpy scipy
+pip install [--user] [-e] .
 ```
 
 ## Usage
@@ -44,14 +46,7 @@ lsqfitgui [--function other_script.py:fcn] fit.p
 
 Both commands will spawn a local server hosting the lsqfit interface.
 
-## Advanced configuration
-
-It is possible to also set up fit meta information, i.e., allowing different fit models. See also the `example` directory for more details.
-
-The following script spawns the server which generated the above image
-```bash
-python example/entrypoint.py
-```
+For more information, see also [the documentation](https://lsqfitgui.readthedocs.io/en/latest/).
 
 
 ## Tests
