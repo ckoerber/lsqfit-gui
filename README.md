@@ -1,4 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/lsqfitgui/badge/?version=latest)](https://lsqfitgui.readthedocs.io/en/latest/?badge=latest)
+[![Code Coverage](https://codecov.io/gh/ckoerber/lsqfit-gui/branch/master/graph/badge.svg)](https://codecov.io/gh/ckoerber/lsqfit-gui)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # Lsqfit GUI
 
 Graphical user interface for `lsqfit` using `dash`.
