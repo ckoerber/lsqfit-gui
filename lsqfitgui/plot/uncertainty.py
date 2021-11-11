@@ -130,9 +130,13 @@ def plot_gvar(
             mean = gv.mean(y[key])
             sdev = gv.sdev(y[key])
             sub_scatter_kwargs = scatter_kwargs.copy()
-            sub_scatter_kwargs["name"] = sub_scatter_kwargs.get("name", "") + f", {key}"
+            sub_scatter_kwargs["name"] = (
+                (sub_scatter_kwargs["name"] + f", {key}")
+                if "name" in sub_scatter_kwargs
+                else key
+            )
 
-            xx = x[key] if isinstance(x, dict) else x
+            xx = x[key] if isinstance(x, dict) and key in x else x
             if kind == "errorbars":
                 plot_errorbars(
                     fig,
@@ -227,11 +231,5 @@ def plot_band(
     )
     scatter_kwargs["showlegend"] = False
     fig.add_trace(
-        go.Scatter(
-            x=x,
-            y=y_mean,
-            mode="lines",
-            **scatter_kwargs,
-        ),
-        **trace_kwargs,
+        go.Scatter(x=x, y=y_mean, mode="lines", **scatter_kwargs,), **trace_kwargs,
     )
