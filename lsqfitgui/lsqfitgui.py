@@ -239,7 +239,7 @@ class FitGUI:
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
-        return self.layout
+        return self.layout.children
 
     def _save_fit_callback(self, *args, **kwargs):
         with NamedTemporaryFile() as out:
