@@ -32,14 +32,13 @@ from lsqfitgui.util.callback import CallbackWrapper
 class FitGUI:
     """Class which initializes the dashboard."""
 
-    body_cls: Body = DefaultBody
-
     def __init__(  # ignore: D107
         self,
         fit: Optional[nonlinear_fit] = None,
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
+        body_cls: Body = DefaultBody,
     ):
         """Initialize the fit gui.
 
@@ -85,7 +84,7 @@ class FitGUI:
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
         self._layout = None
-        self._body = self.body_cls(self.name, self._meta_config)
+        self._body = body_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
