@@ -1,4 +1,6 @@
 """Functions for parsing sidebar form values into python objects."""
+from typing import Dict, List, Any
+
 import re
 import gvar as gv
 from lsqfit import nonlinear_fit
@@ -33,6 +35,10 @@ def process_priors(prior_flat, initial_fit):
     return fit
 
 
-def process_meta(meta_array, meta_config):
+def process_meta(
+    meta_array: List[Any], meta_config: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     """Parse meta form input into dictionary shape using meta config name values."""
+    # for python 3.10+ this will be zip(*, strict=False)
+    assert len(meta_config) == len(meta_array)
     return {config["name"]: val for config, val in zip(meta_config, meta_array)}

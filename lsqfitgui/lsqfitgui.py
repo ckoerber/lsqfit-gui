@@ -16,8 +16,6 @@ from dash import Dash, html, dcc
 
 from lsqfitgui.frontend.dashboard import (
     get_layout,
-    update_layout_from_prior,
-    update_layout_from_meta,
     toggle_prior_widget,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
@@ -28,6 +26,7 @@ from lsqfitgui.frontend.dashboard import (
     FCN_SOURCE_CALLBACK,
     DEFAULT_PLOTS,
 )
+from lsqfitgui.backend import process_meta, process_priors
 from lsqfitgui.util.models import (
     lsqfit_from_multi_model_fit,
     lsqfit_from_multi_model_fit_wrapper,
@@ -154,7 +153,7 @@ class FitGUI:
         if self._use_default_content:
             self._callbacks += [FCN_SOURCE_CALLBACK]
 
-        self._setup_old = list(self._fit_setup_kwargs.values())
+        self._meta_values_old = list(self._fit_setup_kwargs.values())
         self._prior_keys_old = None
         self._prior_values_old = None
         self._fit = self.initial_fit
@@ -178,7 +177,7 @@ class FitGUI:
                 self.initial_fit,
                 name=self.name,
                 meta_config=self._meta_config,
-                meta_values=self._fit_setup_kwargs,
+                meta=self._fit_setup_kwargs,
                 use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
@@ -229,33 +228,63 @@ class FitGUI:
 
     # Callbacks
 
-    def _update_layout_callback(self, prior_ids, prior_values, setup):
-        """Update the layout given new prior input."""
-        prior_keys = [idx["name"] for idx in prior_ids]
-        if setup != self._setup_old:
-            self._layout, self._fit = update_layout_from_meta(
-                setup,
-                self._fit_setup_function,
-                self._fit_setup_kwargs,
+    def _update_layout_from_prior(self, prior, meta_values: Optional[List[str]] = None):
+        """Parse prior form input values to create new layout.
+
+        Creates new fit object for new prior and calls get_layout.
+        """
+        meta = process_meta(meta_values, self._meta_config)
+        new_fit = process_priors(prior, self.fit)
+        return (
+            get_layout(
+                new_fit,
                 name=self.name,
                 meta_config=self._meta_config,
+                meta=meta,
                 use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
-            )
-            self._setup_old = setup
+                tex_function=self.tex_function,
+            ),
+            new_fit,
+        )
+
+    def _update_layout_from_meta(self, inp):
+        """Parse meta form input values to create new layout.
+
+        Creates new fit object for new meta data and prior (using fit_setup_function)
+        and calls get_layout.
+        """
+        meta = process_meta(inp, self._meta_config)
+        meta = {
+            key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()
+        }
+        new_fit = self._fit_setup_function(**meta)
+        return (
+            get_layout(
+                new_fit,
+                name=self.name,
+                meta_config=self._meta_config,
+                meta=meta,
+                use_default_content=self._use_default_content,
+                get_additional_content=self.get_additional_content,
+                plots=self.plots,
+                tex_function=self.tex_function,
+            ),
+            new_fit,
+        )
+
+    def _update_layout_callback(self, prior_ids, prior_values, meta_values):
+        """Update the layout given new prior input."""
+        prior_keys = [idx["name"] for idx in prior_ids]
+        if meta_values != self._meta_values_old:
+            self._layout, self._fit = self._update_layout_from_meta(meta_values)
+            self._meta_values_old = meta_values
         elif (
             prior_keys != self._prior_keys_old or prior_values != self._prior_values_old
         ):
-            self._layout, self._fit = update_layout_from_prior(
-                dict(zip(prior_keys, prior_values)),
-                self.fit,
-                setup=setup,
-                name=self.name,
-                meta_config=self._meta_config,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
+            self._layout, self._fit = self._update_layout_from_prior(
+                dict(zip(prior_keys, prior_values)), meta_values=meta_values
             )
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values

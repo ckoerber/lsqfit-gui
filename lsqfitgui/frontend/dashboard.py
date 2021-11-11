@@ -23,14 +23,13 @@ from lsqfitgui.frontend.sidebar import (  # noqa
 
 from lsqfitgui.frontend.content import get_content
 from lsqfitgui.frontend.content import FCN_SOURCE_CALLBACK, DEFAULT_PLOTS  # noqa
-from lsqfitgui.backend.sidebar import process_priors, process_meta
 
 
 def get_layout(
     fit: nonlinear_fit,
     name: str = "Lsqfit GUI",
     meta_config: Optional[Dict[str, Any]] = None,
-    meta_values: Optional[Dict[str, Any]] = None,
+    meta: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     plots: Optional[List[Dict[str, Any]]] = None,
@@ -47,7 +46,7 @@ def get_layout(
             This should be used for customizations.
         tex_function: Try to display latex expression for fit function.
     """
-    sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
+    sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta=meta)
     sidebar.className = "sticky-top bg-light p-4"
 
     content = (
@@ -99,65 +98,3 @@ UPDATE_LAYOUT_CALLBACK_ARGS = (
         Input(*SIDEBAR_META_INPUT),
     ],
 )
-
-
-def update_layout_from_prior(
-    prior,
-    initial_fit,
-    name: str = "Lsqfit GUI",
-    setup: Optional[Dict[str, Any]] = None,
-    meta_config: Optional[Dict[str, Any]] = None,
-    use_default_content: Optional[bool] = True,
-    get_additional_content: Optional[Callable] = None,
-    plots: Optional[List[Dict[str, Any]]] = None,
-):
-    """Parse prior form input values to create new layout.
-
-    Creates new fit object for new prior and calls get_layout.
-    """
-    setup = process_meta(setup, meta_config) if setup else None
-    new_fit = process_priors(prior, initial_fit)
-    return (
-        get_layout(
-            new_fit,
-            name=name,
-            meta_config=meta_config,
-            meta_values=setup,
-            use_default_content=use_default_content,
-            get_additional_content=get_additional_content,
-            plots=plots,
-        ),
-        new_fit,
-    )
-
-
-def update_layout_from_meta(
-    inp,
-    fit_setup_function,
-    fit_setup_kwargs,
-    name: str = "Lsqfit GUI",
-    meta_config: Optional[Dict[str, Any]] = None,
-    use_default_content: Optional[bool] = True,
-    get_additional_content: Optional[Callable] = None,
-    plots: Optional[List[Dict[str, Any]]] = None,
-):
-    """Parse meta form input values to create new layout.
-
-    Creates new fit object for new meta data and prior (using fit_setup_function)
-    and calls get_layout.
-    """
-    setup = process_meta(inp, meta_config)
-    setup = {key: setup.get(key) or val for key, val in fit_setup_kwargs.items()}
-    new_fit = fit_setup_function(**setup)
-    return (
-        get_layout(
-            new_fit,
-            name=name,
-            meta_config=meta_config,
-            meta_values=setup,
-            use_default_content=use_default_content,
-            get_additional_content=get_additional_content,
-            plots=plots,
-        ),
-        new_fit,
-    )
