@@ -29,13 +29,13 @@ class MyBody(DefaultBody):
 
 def main():
     """Start the GUI for the fit."""
-    FitGUI.body_cls = MyBody
     fit_gui = FitGUI(
         fit_setup_function=generate_fit,
         fit_setup_kwargs={"n_poly": 4},
         meta_config=[
             {"name": "n_poly", "type": "number", "min": 1, "max": 10, "step": 1}
         ],
+        body_cls=MyBody,
     )
     fit_gui.name = "Poly fit"
     fit_gui.setup_app()
