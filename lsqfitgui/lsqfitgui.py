@@ -15,15 +15,11 @@ from lsqfit._extras import unchained_nonlinear_fit
 from dash import Dash, html, dcc
 
 from lsqfitgui.frontend.dashboard import (
-    get_layout,
+    Body,
+    DefaultBody,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
     ASSETS,
-    UPDATE_LAYOUT_CALLBACK_ARGS,
-    SAVE_FIT_CALLBACK_ARGS,
-    EXPORT_PRIOR_CALLBACK,
-    FCN_SOURCE_CALLBACK,
-    DEFAULT_PLOTS,
 )
 from lsqfitgui.backend import process_meta, process_priors
 from lsqfitgui.util.models import (
@@ -36,13 +32,14 @@ from lsqfitgui.util.callback import CallbackWrapper
 class FitGUI:
     """Class which initializes the dashboard."""
 
+    body_cls: Body = DefaultBody
+
     def __init__(  # ignore: D107
         self,
         fit: Optional[nonlinear_fit] = None,
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
-        use_default_content: bool = True,
     ):
         """Initialize the fit gui.
 
@@ -82,47 +79,13 @@ class FitGUI:
                 )
                 fit_gui.run_server(host=host, debug=debug, port=port)
         """  # noqa: E501
-        self.name: str = "Lsqfit GUI"
+        self._name: str = "Lsqfit GUI"
         """Name of the app displayed as title and browser tab title."""
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
-        self._use_default_content = use_default_content
         self._layout = None
-        self.tex_function: bool = True
-        """Try to render the fit function as a latex expression."""
-
-        self.get_additional_content: Optional[
-            Callable[[nonlinear_fit], html.Base]
-        ] = None
-        """Function used to determine dynamic content depending on fit results."""
-
-        self.plots: List[Dict[str, Any]] = []
-        """List of dictionaries specifying plots rendered in the tab element.
-        Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
-
-        Example:
-            Plot the fit results::
-
-                def plot_fcn(fit):
-                    yy = fit.fcn(fit.x, fit.p)
-                    return plot_gvar(fit.x, yy, kind="band")
-
-                gui.plots.append({"name": "Fit results", "fcn": plot_fcn})
-
-        **Allowed keywords are**
-
-        * **name** *(str)*: The name presented in the tabs.
-        * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
-        * **description** *(str)*: Text displayed below figure (can contain latex using).
-        * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
-        * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
-
-        See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
-        """  # noqa: E501
-
-        if self._use_default_content:
-            self.plots += DEFAULT_PLOTS
+        self._body = self.body_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -148,12 +111,14 @@ class FitGUI:
             raise NotImplementedError("Prior of original fit contains correlations.")
 
         self._callbacks: List[CallbackWrapper] = [
-            CallbackWrapper(self._update_layout_callback, UPDATE_LAYOUT_CALLBACK_ARGS),
-            CallbackWrapper(self._save_fit_callback, SAVE_FIT_CALLBACK_ARGS),
-            EXPORT_PRIOR_CALLBACK,
-        ]
-        if self._use_default_content:
-            self._callbacks += [FCN_SOURCE_CALLBACK]
+            CallbackWrapper(
+                self._update_layout_callback, self.body.update_callback_args
+            ),
+            CallbackWrapper(
+                self._save_fit_callback, self.body.sidebar.save_fit_callback_args
+            ),
+            self.body.sidebar.export_prior_callback,
+        ] + self.body.additional_callbacks
 
         self._meta_values_old = list(self._fit_setup_kwargs.values())
         self._prior_keys_old = None
@@ -167,6 +132,20 @@ class FitGUI:
         return self._fit
 
     @property
+    def body(self):
+        return self._body
+
+    @property
+    def name(self) -> str:
+        """Return name of the app."""
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+        self.body.name = value
+
+    @property
     def initial_fit(self) -> nonlinear_fit:
         """Return fit object used to initialize the app."""
         return self._initial_fit
@@ -174,18 +153,7 @@ class FitGUI:
     @property
     def layout(self) -> html.Base:
         """Return the current layout."""
-        if self._layout is None:
-            self._layout = get_layout(
-                self.initial_fit,
-                name=self.name,
-                meta_config=self._meta_config,
-                meta=self._fit_setup_kwargs,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-                tex_function=self.tex_function,
-            )
-        return self._layout
+        return self.body.layout
 
     def setup_app(self, app: Optional[Dash] = None):
         """Initialize the dash app.
@@ -201,6 +169,9 @@ class FitGUI:
         if self._app is not None:
             raise RuntimeError("App already initialized.")
 
+        # load body for the first time
+        self.body.update(self.initial_fit, self._fit_setup_kwargs)
+
         if not app:
             app = Dash(
                 self.name,
@@ -210,7 +181,7 @@ class FitGUI:
             )
 
         app.title = self.name
-        app.layout = html.Div(children=self.layout, id="body")
+        app.layout = self.layout
         for callback in self._callbacks:
             kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
             app.callback(*callback.args, **kwargs)(callback)
@@ -237,19 +208,8 @@ class FitGUI:
         """
         meta = process_meta(meta_values, self._meta_config)
         new_fit = process_priors(prior, self.fit)
-        return (
-            get_layout(
-                new_fit,
-                name=self.name,
-                meta_config=self._meta_config,
-                meta=meta,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-                tex_function=self.tex_function,
-            ),
-            new_fit,
-        )
+        self.body.update(new_fit, meta)
+        return self.layout, new_fit
 
     def _update_layout_from_meta(self, inp):
         """Parse meta form input values to create new layout.
@@ -262,19 +222,8 @@ class FitGUI:
             key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()
         }
         new_fit = self._fit_setup_function(**meta)
-        return (
-            get_layout(
-                new_fit,
-                name=self.name,
-                meta_config=self._meta_config,
-                meta=meta,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-                tex_function=self.tex_function,
-            ),
-            new_fit,
-        )
+        self.body.update(new_fit, meta)
+        return self.layout, new_fit
 
     def _update_layout_callback(self, prior_ids, prior_values, meta_values):
         """Update the layout given new prior input."""
@@ -304,8 +253,6 @@ def run_server(
     fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
-    use_default_content: bool = True,
-    get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     additional_plots: Optional[List[Dict[str, Callable]]] = None,
     tex_function: bool = True,
     run_app: bool = True,
@@ -363,12 +310,10 @@ def run_server(
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
-        use_default_content=use_default_content,
     )
     fit_gui.name = name
     fit_gui.tex_function = tex_function
-    fit_gui.get_additional_content = get_additional_content
-    fit_gui.plots += additional_plots or []
+    fit_gui.body.plots += additional_plots or []
     fit_gui.setup_app()
     if run_app:
         fit_gui.run_server(host=host, debug=debug, port=port)
