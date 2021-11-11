@@ -43,7 +43,7 @@ def get_float_widget(
 def get_sidebar(
     elements: Dict[str, GVar],
     meta_config: Optional[Dict] = None,
-    meta_values: Optional[Dict] = None,
+    meta: Optional[Dict] = None,
 ):
     """Create sidebar."""
     if meta_config is not None:
@@ -52,7 +52,7 @@ def get_sidebar(
             config = config.copy()
             name = config.pop("name")
             config["id"] = {"type": "meta", "name": name}
-            config["value"] = meta_values[name]
+            config["value"] = meta[name]
 
             if "options" in config:
                 inp = dbc.Select(**config)
