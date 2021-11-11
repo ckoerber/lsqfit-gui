@@ -17,8 +17,7 @@ from lsqfitgui.frontend.sidebar import (
 )
 from lsqfitgui.frontend.sidebar import (  # noqa
     SAVE_FIT_CALLBACK_ARGS,
-    EXPORT_PRIOR_CALLBACK_ARGS,
-    toggle_prior_widget,
+    EXPORT_PRIOR_CALLBACK,
 )
 
 from lsqfitgui.frontend.content import get_content
@@ -28,7 +27,7 @@ from lsqfitgui.frontend.content import FCN_SOURCE_CALLBACK, DEFAULT_PLOTS  # noq
 def get_layout(
     fit: nonlinear_fit,
     name: str = "Lsqfit GUI",
-    meta_config: Optional[Dict[str, Any]] = None,
+    meta_config: Optional[List[Dict[str, Any]]] = None,
     meta: Optional[Dict[str, Any]] = None,
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,

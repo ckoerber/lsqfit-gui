@@ -212,7 +212,7 @@ def plot_band(
 
     trace_kwargs = trace_kwargs or {}
 
-    scatter_kwargs = scatter_kwargs.copy() or {}
+    scatter_kwargs = scatter_kwargs.copy() if isinstance(scatter_kwargs, dict) else {}
     scatter_kwargs["opacity"] = scatter_kwargs.get("opacity", 0.8)
     scatter_kwargs["line_color"] = scatter_kwargs.get("line_color", "indigo")
     scatter_kwargs["legendgroup"] = scatter_kwargs.get(

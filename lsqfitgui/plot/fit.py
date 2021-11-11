@@ -8,6 +8,7 @@ from lsqfit import nonlinear_fit
 from lsqfit._extras import chained_nonlinear_fit, unchained_nonlinear_fit
 
 from lsqfitgui.plot.util import get_residuals
+from lsqfitgui.plot.util import RESIDUALS_DESCRIPTION  # noqa
 from lsqfitgui.plot.uncertainty import plot_gvar, interpolate
 
 
@@ -57,6 +58,3 @@ def plot_residuals(fit, fig: Optional[Figure] = None):
     fig.add_hrect(-1, 1, line_width=0, fillcolor="gray", opacity=0.2)
 
     return fig
-
-
-plot_residuals.description = get_residuals.description

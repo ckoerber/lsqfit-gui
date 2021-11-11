@@ -7,10 +7,11 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
-from lsqfitgui.plot.fit import plot_fit, plot_residuals
+from lsqfitgui.plot.fit import plot_fit, plot_residuals, RESIDUALS_DESCRIPTION
 from lsqfitgui.plot.uncertainty import plot_gvar
 from lsqfitgui.util.function import parse_function_expression
 from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
+from lsqfitgui.util.callback import CallbackWrapper
 
 
 def document_function(
@@ -88,21 +89,19 @@ def _toggle_function_source_collapse(n, is_open):
     return not is_open if n else is_open
 
 
-FCN_SOURCE_CALLBACK = _toggle_function_source_collapse
-FCN_SOURCE_CALLBACK.args = (
-    Output("collapse-function-source", "is_open"),
-    [Input("collapse-function-source-button", "n_clicks")],
-    [State("collapse-function-source", "is_open")],
+FCN_SOURCE_CALLBACK = CallbackWrapper(
+    _toggle_function_source_collapse,
+    args=(
+        Output("collapse-function-source", "is_open"),
+        [Input("collapse-function-source-button", "n_clicks")],
+        [State("collapse-function-source", "is_open")],
+    ),
 )
 
 
 DEFAULT_PLOTS = [
     {"name": "Fit", "fcn": plot_fit},
-    {
-        "name": "Residuals",
-        "fcn": plot_residuals,
-        "description": plot_residuals.description,
-    },
+    {"name": "Residuals", "fcn": plot_residuals, "description": RESIDUALS_DESCRIPTION},
 ]
 """Plots which are added to the GUI by default."""
 

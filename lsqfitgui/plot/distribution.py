@@ -1,5 +1,5 @@
 """Plotting utility functions for distributions."""
-from typing import List
+from typing import Dict
 
 import numpy as np
 from scipy.stats import norm
@@ -7,7 +7,7 @@ from scipy.stats import norm
 import plotly.graph_objects as go
 
 
-def get_p2p_fig(fit) -> List[go.Figure]:
+def get_p2p_fig(fit) -> Dict[str, go.Figure]:
     """Plot change of prior to posterior distribution."""
     figs = {}
     for n, (key, prior) in enumerate(fit.prior.items()):

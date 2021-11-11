@@ -1,5 +1,5 @@
 """Functions for parsing sidebar form values into python objects."""
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 import re
 import gvar as gv
@@ -36,9 +36,24 @@ def process_priors(prior_flat, initial_fit):
 
 
 def process_meta(
-    meta_array: List[Any], meta_config: List[Dict[str, Any]]
+    meta_array: Optional[List[Any]], meta_config: Optional[List[Dict[str, Any]]]
 ) -> Dict[str, Any]:
     """Parse meta form input into dictionary shape using meta config name values."""
     # for python 3.10+ this will be zip(*, strict=False)
-    assert len(meta_config) == len(meta_array)
-    return {config["name"]: val for config, val in zip(meta_config, meta_array)}
+    if not meta_array and not meta_config:
+        return {}
+    elif meta_array and not meta_config:
+        raise TypeError(
+            "Improperly configured. Received meta config values but no meta config."
+        )
+    elif meta_config and not meta_array:
+        raise TypeError("Improperly configured. Received meta configs but no values.")
+    else:
+        assert isinstance(meta_config, list)
+        assert isinstance(meta_array, list)
+        if len(meta_config) != len(meta_array):
+            raise ValueError(
+                "Improperly configured."
+                " Meta config options does not have the same number of values recieved."
+            )
+        return {config["name"]: val for config, val in zip(meta_config, meta_array)}
