@@ -71,7 +71,7 @@ def get_residuals(fit):
     return res
 
 
-get_residuals.description = r"""The residuals are defined by
+RESIDUALS_DESCRIPTION = r"""The residuals are defined by
 $$
 \begin{aligned}
     r_i(p) &= \frac{f_i(p) - y_i}{\Delta y_i}\,,&

@@ -1,5 +1,5 @@
 """Sidebar definitions for dash app."""
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Any
 
 from gvar import GVar
 
@@ -10,8 +10,7 @@ import dash_bootstrap_components as dbc
 
 from lsqfitgui.frontend.widgets.export_prior import (  # noqa
     get_export_prior_widget,
-    EXPORT_PRIOR_CALLBACK_ARGS,
-    toggle_prior_widget,
+    EXPORT_PRIOR_CALLBACK,
 )
 
 SIDEBAR_STYLE = {"overflow-y": "auto", "height": "100vh"}
@@ -42,11 +41,12 @@ def get_float_widget(
 
 def get_sidebar(
     elements: Dict[str, GVar],
-    meta_config: Optional[Dict] = None,
+    meta_config: Optional[List[Dict[str, Any]]] = None,
     meta: Optional[Dict] = None,
 ):
     """Create sidebar."""
     if meta_config is not None:
+        assert isinstance(meta, dict)
         meta_elements = [html.H4("Meta")]
         for config in meta_config:
             config = config.copy()

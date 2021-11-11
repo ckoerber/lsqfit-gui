@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional, List
 
 import re
 import importlib.util
+import importlib.machinery
 import sympy
 
 
@@ -15,11 +16,16 @@ def parse_function(string: str):
     """
     try:
         path, name = string.split(":")
-        spec = importlib.util.spec_from_file_location("fcn_src", path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return getattr(module, name)
+        loader = importlib.machinery.SourceFileLoader("fcn_src", path)
+        if loader:
+            spec = importlib.util.spec_from_loader(loader.name, loader)
+            if spec:
+                module = importlib.util.module_from_spec(spec)
+                loader.exec_module(module)
+                return getattr(module, name)
     except Exception:
+        pass
+    finally:
         return None
 
 

@@ -16,13 +16,12 @@ from dash import Dash, html, dcc
 
 from lsqfitgui.frontend.dashboard import (
     get_layout,
-    toggle_prior_widget,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
     ASSETS,
     UPDATE_LAYOUT_CALLBACK_ARGS,
     SAVE_FIT_CALLBACK_ARGS,
-    EXPORT_PRIOR_CALLBACK_ARGS,
+    EXPORT_PRIOR_CALLBACK,
     FCN_SOURCE_CALLBACK,
     DEFAULT_PLOTS,
 )
@@ -31,6 +30,7 @@ from lsqfitgui.util.models import (
     lsqfit_from_multi_model_fit,
     lsqfit_from_multi_model_fit_wrapper,
 )
+from lsqfitgui.util.callback import CallbackWrapper
 
 
 class FitGUI:
@@ -82,7 +82,7 @@ class FitGUI:
                 )
                 fit_gui.run_server(host=host, debug=debug, port=port)
         """  # noqa: E501
-        self.name: str = None
+        self.name: str = "Lsqfit GUI"
         """Name of the app displayed as title and browser tab title."""
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
@@ -92,7 +92,9 @@ class FitGUI:
         self.tex_function: bool = True
         """Try to render the fit function as a latex expression."""
 
-        self.get_additional_content: Callable[[nonlinear_fit], html.Base] = None
+        self.get_additional_content: Optional[
+            Callable[[nonlinear_fit], html.Base]
+        ] = None
         """Function used to determine dynamic content depending on fit results."""
 
         self.plots: List[Dict[str, Any]] = []
@@ -145,10 +147,10 @@ class FitGUI:
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 
-        self._callbacks = [
-            self._update_layout_callback,
-            self._save_fit_callback,
-            self._export_prior_callback,
+        self._callbacks: List[CallbackWrapper] = [
+            CallbackWrapper(self._update_layout_callback, UPDATE_LAYOUT_CALLBACK_ARGS),
+            CallbackWrapper(self._save_fit_callback, SAVE_FIT_CALLBACK_ARGS),
+            EXPORT_PRIOR_CALLBACK,
         ]
         if self._use_default_content:
             self._callbacks += [FCN_SOURCE_CALLBACK]
@@ -290,22 +292,10 @@ class FitGUI:
             self._prior_values_old = prior_values
         return self.layout
 
-    _update_layout_callback.args = UPDATE_LAYOUT_CALLBACK_ARGS
-    _update_layout_callback.kwargs = {"prevent_initial_call": True}
-
     def _save_fit_callback(self, *args, **kwargs):
         with NamedTemporaryFile() as out:
             out.write(dumps(self.fit))
             return dcc.send_file(out.name, filename="fit.p")
-
-    _save_fit_callback.args = SAVE_FIT_CALLBACK_ARGS
-    _save_fit_callback.kwargs = {"prevent_initial_call": True}
-
-    def _export_prior_callback(self, *args, **kwargs):
-        return toggle_prior_widget(*args, **kwargs)
-
-    _export_prior_callback.args = EXPORT_PRIOR_CALLBACK_ARGS
-    _export_prior_callback.kwargs = {"prevent_initial_call": True}
 
 
 def run_server(
@@ -314,9 +304,9 @@ def run_server(
     fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
-    use_default_content: Optional[bool] = True,
+    use_default_content: bool = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    additional_plots: Optional[Dict[str, Callable]] = None,
+    additional_plots: Optional[List[Dict[str, Callable]]] = None,
     tex_function: bool = True,
     run_app: bool = True,
     debug: bool = True,
