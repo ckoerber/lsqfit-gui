@@ -4,3 +4,15 @@ requires = [
   "wheel",
 ]
 build-backend = "setuptools.build_meta"
+
+[[tool.mypy.overrides]]
+module = [
+    "sympy",
+    "scipy.stats",
+    "gvar",
+    "lsqfit.*",
+    "dash.*",
+    "plotly.*",
+    "dash_bootstrap_components.*"
+]
+ignore_missing_imports = true
