@@ -90,6 +90,8 @@ class FitGUI:
         self._meta_config = meta_config
         self._use_default_content = use_default_content
         self._layout = None
+        self.tex_function: bool = True
+        """Try to render the fit function as a latex expression."""
 
         self.get_additional_content: Callable[[nonlinear_fit], html.Base] = None
         """Function used to determine dynamic content depending on fit results."""
@@ -180,6 +182,7 @@ class FitGUI:
                 use_default_content=self._use_default_content,
                 get_additional_content=self.get_additional_content,
                 plots=self.plots,
+                tex_function=self.tex_function,
             )
         return self._layout
 
@@ -285,6 +288,7 @@ def run_server(
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     additional_plots: Optional[Dict[str, Callable]] = None,
+    tex_function: bool = True,
     run_app: bool = True,
     debug: bool = True,
     host: str = "localhost",
@@ -304,6 +308,7 @@ def run_server(
             These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
         use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
         get_additional_content: Function used to determine dynamic content depending on fit results.
+        tex_function: Try to render the fit function as latex.
         additional_plots: List of dictionaries specifying plots rendered in the tab element.
             Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
             This populates :attr:`FitGUI.plots`.
@@ -342,6 +347,7 @@ def run_server(
         use_default_content=use_default_content,
     )
     fit_gui.name = name
+    fit_gui.tex_function = tex_function
     fit_gui.get_additional_content = get_additional_content
     fit_gui.plots += additional_plots or []
     fit_gui.setup_app()

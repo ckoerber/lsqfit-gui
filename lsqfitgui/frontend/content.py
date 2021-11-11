@@ -17,6 +17,7 @@ def document_function(
     fcn: Callable,
     parameters: Optional[Dict] = None,
     x_dict_keys: Optional[List[str]] = None,
+    tex_function: bool = True,
 ) -> List[html.Base]:
     """Documents the function."""
     documentation = []
@@ -42,7 +43,7 @@ def document_function(
         html.Pre(get_entrypoint_string() + "\n" + get_version_string())
     )
 
-    if parameters:
+    if parameters and tex_function:
         tex = parse_function_expression(fcn, parameters, x_dict_keys=x_dict_keys)
         if tex:
             documentation.append(html.P(fr"$${tex}$$"))
@@ -135,7 +136,10 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
 
 
 def get_content(
-    fit, name: str = "Lsqfit GUI", plots: Optional[List[Dict[str, Any]]] = None,
+    fit,
+    name: str = "Lsqfit GUI",
+    plots: Optional[List[Dict[str, Any]]] = None,
+    tex_function: bool = True,
 ):
     """Create default content block for fit object.
 
@@ -156,6 +160,7 @@ def get_content(
                                 x_dict_keys=list(fit.x.keys())
                                 if isinstance(fit.x, dict)
                                 else None,
+                                tex_function=tex_function,
                             )
                         ),
                         html.H4("Fit parameters"),

@@ -34,6 +34,7 @@ def get_layout(
     use_default_content: Optional[bool] = True,
     get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
     plots: Optional[List[Dict[str, Any]]] = None,
+    tex_function: bool = True,
 ) -> html.Div:
     """Create sidebar and content given fit and config values.
 
@@ -44,11 +45,16 @@ def get_layout(
         use_default_content: Render default GUI elements or not.
         get_additional_content: Function to return additional html content given a fit.
             This should be used for customizations.
+        tex_function: Try to display latex expression for fit function.
     """
     sidebar = get_sidebar(fit.prior, meta_config=meta_config, meta_values=meta_values)
     sidebar.className = "sticky-top bg-light p-4"
 
-    content = get_content(fit, name=name, plots=plots) if use_default_content else None
+    content = (
+        get_content(fit, name=name, plots=plots, tex_function=tex_function)
+        if use_default_content
+        else None
+    )
     additional_content = get_additional_content(fit) if get_additional_content else None
 
     layout = html.Div(
