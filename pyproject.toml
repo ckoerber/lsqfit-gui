@@ -13,6 +13,7 @@ module = [
     "lsqfit.*",
     "dash.*",
     "plotly.*",
-    "dash_bootstrap_components.*"
+    "dash_bootstrap_components.*",
+    "click"
 ]
 ignore_missing_imports = true

@@ -6,10 +6,10 @@ from fit import generate_fit, A0
 from dash import html
 
 from lsqfitgui import FitGUI
-from lsqfitgui.frontend.dashboard import DefaultBody
+from lsqfitgui.frontend.dashboard import BodyDefaultTemplate
 
 
-class MyBody(DefaultBody):
+class MyBodyTemplate(BodyDefaultTemplate):
     def get_content(self, fit):
         """Add additional content to the default content."""
         content = super().get_content(fit)
@@ -35,7 +35,7 @@ def main():
         meta_config=[
             {"name": "n_poly", "type": "number", "min": 1, "max": 10, "step": 1}
         ],
-        body_cls=MyBody,
+        body_cls=MyBodyTemplate,
     )
     fit_gui.name = "Poly fit"
     fit_gui.setup_app()
