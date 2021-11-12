@@ -41,7 +41,6 @@ def main():
         template_cls=MyBodyTemplate,
     )
     fit_gui.name = "Poly fit"
-    fit_gui.setup_app()
     fit_gui.run_server()
 
 
