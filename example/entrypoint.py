@@ -10,9 +10,9 @@ from lsqfitgui.frontend.dashboard import BodyDefaultTemplate
 
 
 class MyBodyTemplate(BodyDefaultTemplate):
-    def get_content(self, fit):
+    def get_content(self, fit, meta=None):
         """Add additional content to the default content."""
-        content = super().get_content(fit)
+        content = super().get_content(fit, meta=meta)
         content.append(
             html.Div(
                 [
