@@ -100,9 +100,11 @@ class BodyTemplate:
     def get_content(
         self, fit: nonlinear_fit, meta: Optional[Dict] = None
     ) -> List[html.Base]:
-        """Create default content block for fit object.
+        """Create content block for fit object.
 
-        This includes the plots for the data, residuals and details.
+        Arguments:
+            fit: The current fit object (after updating the prior and meta information).
+            meta: Meta information needed to set up the fit, if applicable
         """
         raise NotImplementedError()
 
@@ -150,7 +152,14 @@ See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
     def get_content(
         self, fit: nonlinear_fit, meta: Optional[Dict] = None
     ) -> List[html.Base]:
-        """Adds content to the GUI."""
+        """Create default content block for fit object.
+
+        Arguments:
+            fit: The current fit object (after updating the prior and meta information).
+            meta: Meta information needed to set up the fit, if applicable
+
+        This includes the plots for the data, residuals and details of the fit function.
+        """
         figure_data = get_figures(fit, self.plots)
         content = [
             html.H1(children=self.name),
