@@ -99,7 +99,7 @@ FCN_SOURCE_CALLBACK = CallbackWrapper(
 )
 
 
-DEFAULT_PLOTS = [
+DEFAULT_PLOTS: List[Dict[str, Any]] = [
     {"name": "Fit", "fcn": plot_fit},
     {"name": "Residuals", "fcn": plot_residuals, "description": RESIDUALS_DESCRIPTION},
 ]
