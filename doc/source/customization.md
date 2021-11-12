@@ -10,6 +10,8 @@ For example, the following code appends additional text to the dashboard
 
 ```python
 from dash import html
+from lsqfit import nonlinear_fit
+from lsqfitgui import FitGUI, DefaultBodyTemplate
 
 class MyBodyTemplate(DefaultBodyTemplate):
 
