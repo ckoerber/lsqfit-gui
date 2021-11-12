@@ -39,6 +39,9 @@ class BodyTemplate:
     The default content of the app can be customized by inheriting from this class and overloading the :meth:`get_content` method.
     """  # noqa
 
+    sidebar_div_class: str = "col-xs-12 col-sm-5 col-md-4 col-xl-3 col-xxl-2"
+    content_div_class: str = "col-xs-12 col-sm-7 col-md-8 col-xl-9 col-xxl-10"
+
     def __init__(
         self,
         name: str = "Lsqfit GUI",
@@ -75,12 +78,11 @@ class BodyTemplate:
                     children=[
                         html.Div(
                             children=self.sidebar.layout,
-                            className="col-xs-12 col-sm-5 col-md-4 col-xl-3 col-xxl-2",
+                            className=self.sidebar_div_class,
                             id="sticky-sidebar",
                         ),
                         html.Div(
-                            children=self.content,
-                            className="col-xs-12 col-sm-7 col-md-8 col-xl-9 col-xxl-10",
+                            children=self.content, className=self.content_div_class,
                         ),
                     ],
                     className="row py-3",
