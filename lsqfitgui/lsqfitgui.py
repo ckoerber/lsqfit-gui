@@ -3,7 +3,7 @@
 The :class:`FitGUI` class provides the interface to `lsqfit` providing dynamic html elements which can be embedded into a dash (flask) app.
 The :func:`run_server` method provides a convinient interafce which also starts the Dash app which is accessible by any (local) browser.
 """  # noqa: E501
-from typing import Optional, Callable, Dict, List, Any
+from typing import Optional, Callable, Dict, List, Any, Type
 
 from tempfile import NamedTemporaryFile
 
@@ -14,9 +14,9 @@ from lsqfit._extras import unchained_nonlinear_fit
 
 from dash import Dash, html, dcc
 
-from lsqfitgui.frontend.dashboard import (
-    Body,
-    DefaultBody,
+from lsqfitgui.frontend.body import (
+    BodyTemplate,
+    DefaultBodyTemplate,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
     ASSETS,
@@ -38,7 +38,7 @@ class FitGUI:
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
-        body_cls: Body = DefaultBody,
+        template_cls: Type[BodyTemplate] = DefaultBodyTemplate,
     ):
         """Initialize the fit gui.
 
@@ -53,6 +53,7 @@ class FitGUI:
             meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
                 These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
             use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
+            template_cls: Class which renders the html body. Must inherit from  :class:`lsqfitgui.frontend.body.BodyTemplate`.
 
         Example:
             The most basic example just requires a nonlinear_fit object::
@@ -84,7 +85,7 @@ class FitGUI:
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
         self._layout = None
-        self._body = body_cls(self.name, self._meta_config)
+        self._body = template_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
@@ -131,7 +132,8 @@ class FitGUI:
         return self._fit
 
     @property
-    def body(self):
+    def body(self) -> BodyTemplate:
+        """Returns the html body instance."""
         return self._body
 
     @property
@@ -309,9 +311,11 @@ def run_server(
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
+        template_cls=DefaultBodyTemplate,
     )
     fit_gui.name = name
-    fit_gui.tex_function = tex_function
+    assert isinstance(fit_gui.body, DefaultBodyTemplate)
+    fit_gui.body.tex_function = tex_function
     fit_gui.body.plots += additional_plots or []
     fit_gui.setup_app()
     if run_app:

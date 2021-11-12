@@ -53,6 +53,7 @@ class Sidebar:
     export_prior_callback = EXPORT_PRIOR_CALLBACK
 
     style = {"overflow-y": "auto", "height": "100vh"}
+    className = "sticky-top bg-light p-4"
 
     def __init__(
         self, meta_config: Optional[List[Dict[str, Any]]] = None,
@@ -61,11 +62,17 @@ class Sidebar:
         self._meta: Dict[str, Any] = {}
         self._prior: Dict[str, GVar] = {}
         self._layout: Optional[html.Div] = None
-        self._meta_config: List[Dict[str, Any]] = meta_config or {}
+        self._meta_config: List[Dict[str, Any]] = meta_config or []
 
     @property
     def meta_config(self):
         return self._meta_config
+
+    @property
+    def layout(self) -> html.Div:
+        if self._layout is None:
+            self._layout = self.get_sidebar(self._prior, self._meta)
+        return self._layout
 
     def update(self, prior: Dict[str, GVar], meta: Optional[Dict] = None) -> html.Div:
         if meta:
@@ -73,12 +80,6 @@ class Sidebar:
         if prior:
             self.prior = prior
         self._layout = self.get_sidebar(self.prior, self._meta)
-        return self._layout
-
-    @property
-    def layout(self) -> html.Div:
-        if self._layout is None:
-            self._layout = self.get_sidebar(self._prior, self._meta)
         return self._layout
 
     def get_sidebar(
@@ -188,4 +189,5 @@ class Sidebar:
                 ),
             ],
             style=self.style,
+            className=self.className,
         )
