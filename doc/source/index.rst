@@ -12,6 +12,7 @@ lsqfitgui documentation
 
    quickstart
    examples
+   customization
    api/lsqfitgui
 
 
