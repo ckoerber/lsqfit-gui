@@ -5,11 +5,14 @@ from fit import generate_fit, A0
 
 from dash import html
 
-from lsqfitgui import FitGUI
-from lsqfitgui.frontend.dashboard import BodyDefaultTemplate
+from lsqfitgui import FitGUI, DefaultBodyTemplate
 
 
-class MyBodyTemplate(BodyDefaultTemplate):
+class MyBodyTemplate(DefaultBodyTemplate):
+    # Bootstrap columns: https://getbootstrap.com/docs/5.0/layout/grid/#grid-options
+    sidebar_div_class = "col-xs-12 col-sm-6 col-md-6 col-xl-5 col-xxl-4"
+    content_div_class = "col-xs-12 col-sm-6 col-md-6 col-xl-7 col-xxl-8"
+
     def get_content(self, fit, meta=None):
         """Add additional content to the default content."""
         content = super().get_content(fit, meta=meta)
@@ -35,7 +38,7 @@ def main():
         meta_config=[
             {"name": "n_poly", "type": "number", "min": 1, "max": 10, "step": 1}
         ],
-        body_cls=MyBodyTemplate,
+        template_cls=MyBodyTemplate,
     )
     fit_gui.name = "Poly fit"
     fit_gui.setup_app()
