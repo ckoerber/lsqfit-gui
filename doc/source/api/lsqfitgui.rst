@@ -24,3 +24,25 @@ API: lsqfitgui
 
 .. autoclass:: FitGUI
     :members:
+
+
+
+``BodyTemplate``
+------------------
+
+.. autoclass:: BodyTemplate
+    :members:
+
+
+``DefaultBodyTemplate``
+-----------------------
+
+.. autoclass:: DefaultBodyTemplate
+    :members:
+
+
+``DEFAULT_PLOTS``
+-----------------------
+
+.. autodata:: lsqfitgui.frontend.content.DEFAULT_PLOTS
+    :no-value:

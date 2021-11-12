@@ -36,7 +36,7 @@ ASSETS = path.abspath(path.join(path.dirname(path.dirname(__file__)), "assets"))
 class BodyTemplate:
     """Base class for rendering the html body of the app.
 
-    The default content of the app can be customized by inheriting from this class and overloading the :method:`get_content` method.
+    The default content of the app can be customized by inheriting from this class and overloading the :meth:`get_content` method.
     """  # noqa
 
     def __init__(
@@ -126,7 +126,8 @@ Example:
             yy = fit.fcn(fit.x, fit.p)
             return plot_gvar(fit.x, yy, kind="band")
 
-        gui.plots.append({"name": "Fit results", "fcn": plot_fcn})
+        gui = FitGUI(...)
+        gui.body.plots.append({"name": "Fit results", "fcn": plot_fcn})
 
 **Allowed keywords are**
 
