@@ -93,9 +93,11 @@ class BodyTemplate:
     def update(self, fit: nonlinear_fit, meta: Optional[Dict] = None):
         """Updates sidebar and content from fit and meta configuration."""
         self.sidebar.update(fit.prior, meta)
-        self._content = self.get_content(fit)
+        self._content = self.get_content(fit, meta)
 
-    def get_content(self, fit: nonlinear_fit) -> List[html.Base]:
+    def get_content(
+        self, fit: nonlinear_fit, meta: Optional[Dict] = None
+    ) -> List[html.Base]:
         """Create default content block for fit object.
 
         This includes the plots for the data, residuals and details.
@@ -143,7 +145,9 @@ See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
         """Callbacks present in the app. This adds the callback for toggeling the function source code.
         """
 
-    def get_content(self, fit: nonlinear_fit) -> List[html.Base]:
+    def get_content(
+        self, fit: nonlinear_fit, meta: Optional[Dict] = None
+    ) -> List[html.Base]:
         """Adds content to the GUI."""
         figure_data = get_figures(fit, self.plots)
         content = [
