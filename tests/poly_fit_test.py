@@ -26,7 +26,6 @@ def poly_fit_gui():
         fit_setup_function=generate_fit,
         fit_setup_kwargs=FIT_SETUP_KWARGS,
         meta_config=META_CONFIG,
-        use_default_content=True,
         run_app=False,
     )
 

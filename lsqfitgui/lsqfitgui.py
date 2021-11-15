@@ -3,7 +3,7 @@
 The :class:`FitGUI` class provides the interface to `lsqfit` providing dynamic html elements which can be embedded into a dash (flask) app.
 The :func:`run_server` method provides a convinient interafce which also starts the Dash app which is accessible by any (local) browser.
 """  # noqa: E501
-from typing import Optional, Callable, Dict, List, Any
+from typing import Optional, Callable, Dict, List, Any, Type
 
 from tempfile import NamedTemporaryFile
 
@@ -14,24 +14,19 @@ from lsqfit._extras import unchained_nonlinear_fit
 
 from dash import Dash, html, dcc
 
-from lsqfitgui.frontend.dashboard import (
-    get_layout,
-    update_layout_from_prior,
-    update_layout_from_meta,
-    toggle_prior_widget,
+from lsqfitgui.frontend.body import (
+    BodyTemplate,
+    DefaultBodyTemplate,
     EXTERNAL_STYLESHEETS,
     EXTERNAL_SCRIPTS,
     ASSETS,
-    UPDATE_LAYOUT_CALLBACK_ARGS,
-    SAVE_FIT_CALLBACK_ARGS,
-    EXPORT_PRIOR_CALLBACK_ARGS,
-    FCN_SOURCE_CALLBACK,
-    DEFAULT_PLOTS,
 )
+from lsqfitgui.backend import process_meta, process_priors
 from lsqfitgui.util.models import (
     lsqfit_from_multi_model_fit,
     lsqfit_from_multi_model_fit_wrapper,
 )
+from lsqfitgui.util.callback import CallbackWrapper
 
 
 class FitGUI:
@@ -43,7 +38,7 @@ class FitGUI:
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
-        use_default_content: bool = True,
+        template_cls: Type[BodyTemplate] = DefaultBodyTemplate,
     ):
         """Initialize the fit gui.
 
@@ -58,6 +53,7 @@ class FitGUI:
             meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
                 These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
             use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
+            template_cls: Class which renders the html body. Must inherit from  :class:`lsqfitgui.frontend.body.BodyTemplate`.
 
         Example:
             The most basic example just requires a nonlinear_fit object::
@@ -83,48 +79,16 @@ class FitGUI:
                 )
                 fit_gui.run_server(host=host, debug=debug, port=port)
         """  # noqa: E501
-        self.name: str = None
+        self._name: str = "Lsqfit GUI"
         """Name of the app displayed as title and browser tab title."""
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
-        self._use_default_content = use_default_content
-        self._layout = None
-
-        self.get_additional_content: Callable[[nonlinear_fit], html.Base] = None
-        """Function used to determine dynamic content depending on fit results."""
-
-        self.plots: List[Dict[str, Any]] = []
-        """List of dictionaries specifying plots rendered in the tab element.
-        Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
-
-        Example:
-            Plot the fit results::
-
-                def plot_fcn(fit):
-                    yy = fit.fcn(fit.x, fit.p)
-                    return plot_gvar(fit.x, yy, kind="band")
-
-                gui.plots.append({"name": "Fit results", "fcn": plot_fcn})
-
-        **Allowed keywords are**
-
-        * **name** *(str)*: The name presented in the tabs.
-        * **fcn** *(Callable[[nonlinear_fit], Figure])*: The function used to generate the plot. Must take a plot and kwargs as an input.
-        * **description** *(str)*: Text displayed below figure (can contain latex using).
-        * **kwargs** *(Dict[str, Any])*: A dictionary passed to the above function.
-        * **static_plot_gvar** *(Dict[str, Any])*: Static data passed to :func:`plot_gvar` added to the same figure (i.e., to also plot data as an comparison).
-
-        See also the :attr:`lsqfitgui.frontend.content.DEFAULT_PLOTS`.
-        """  # noqa: E501
-
-        if self._use_default_content:
-            self.plots += DEFAULT_PLOTS
+        self._body = template_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
-                "You must either specify the fit or fit setup function"
-                " to initialize the GUI."
+                "You must either specify the fit or fit setup function" " to initialize the GUI."
             )
         elif fit_setup_function is not None:
             self._initial_fit = fit_setup_function(**self._fit_setup_kwargs)
@@ -139,20 +103,17 @@ class FitGUI:
                 )
 
         if not allclose(
-            evalcorr(self.initial_fit.prior.flatten()),
-            eye(len(self.initial_fit.prior.flatten())),
+            evalcorr(self.initial_fit.prior.flatten()), eye(len(self.initial_fit.prior.flatten())),
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 
-        self._callbacks = [
-            self._update_layout_callback,
-            self._save_fit_callback,
-            self._export_prior_callback,
-        ]
-        if self._use_default_content:
-            self._callbacks += [FCN_SOURCE_CALLBACK]
+        self._callbacks: List[CallbackWrapper] = [
+            CallbackWrapper(self._update_layout_callback, self.body.update_callback_args),
+            CallbackWrapper(self._save_fit_callback, self.body.sidebar.save_fit_callback_args),
+            self.body.sidebar.export_prior_callback,
+        ] + self.body.additional_callbacks
 
-        self._setup_old = list(self._fit_setup_kwargs.values())
+        self._meta_values_old = list(self._fit_setup_kwargs.values())
         self._prior_keys_old = None
         self._prior_values_old = None
         self._fit = self.initial_fit
@@ -164,6 +125,21 @@ class FitGUI:
         return self._fit
 
     @property
+    def body(self) -> BodyTemplate:
+        """Returns the html body instance."""
+        return self._body
+
+    @property
+    def name(self) -> str:
+        """Return name of the app."""
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+        self.body.name = value
+
+    @property
     def initial_fit(self) -> nonlinear_fit:
         """Return fit object used to initialize the app."""
         return self._initial_fit
@@ -171,17 +147,7 @@ class FitGUI:
     @property
     def layout(self) -> html.Base:
         """Return the current layout."""
-        if self._layout is None:
-            self._layout = get_layout(
-                self.initial_fit,
-                name=self.name,
-                meta_config=self._meta_config,
-                meta_values=self._fit_setup_kwargs,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-            )
-        return self._layout
+        return self.body.layout
 
     def setup_app(self, app: Optional[Dash] = None):
         """Initialize the dash app.
@@ -197,6 +163,9 @@ class FitGUI:
         if self._app is not None:
             raise RuntimeError("App already initialized.")
 
+        # load body for the first time
+        self.body.update(self.initial_fit, self._fit_setup_kwargs)
+
         if not app:
             app = Dash(
                 self.name,
@@ -206,7 +175,7 @@ class FitGUI:
             )
 
         app.title = self.name
-        app.layout = html.Div(children=self.layout, id="body")
+        app.layout = self.layout
         for callback in self._callbacks:
             kwargs = callback.kwargs if hasattr(callback, "kwargs") else {}
             app.callback(*callback.args, **kwargs)(callback)
@@ -226,54 +195,45 @@ class FitGUI:
 
     # Callbacks
 
-    def _update_layout_callback(self, prior_ids, prior_values, setup):
+    def _update_layout_from_prior(
+        self, prior_keys, prior_values, meta_values: Optional[List[str]] = None
+    ):
+        """Parse prior form input values to create new layout.
+
+        Creates new fit object for new prior and calls get_layout.
+        """
+        meta = process_meta(meta_values, self._meta_config)
+        prior = dict(zip(prior_keys, prior_values))
+        self._fit = process_priors(prior, self.fit)
+        self.body.update(self.fit, meta)
+
+    def _update_layout_from_meta(self, meta_values):
+        """Parse meta form input values to create new layout.
+
+        Creates new fit object for new meta data and prior (using fit_setup_function)
+        and calls get_layout.
+        """
+        meta = process_meta(meta_values, self._meta_config)
+        meta = {key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()}
+        self._fit = self._fit_setup_function(**meta)
+        self.body.update(self.fit, meta)
+
+    def _update_layout_callback(self, prior_ids, prior_values, meta_values):
         """Update the layout given new prior input."""
         prior_keys = [idx["name"] for idx in prior_ids]
-        if setup != self._setup_old:
-            self._layout, self._fit = update_layout_from_meta(
-                setup,
-                self._fit_setup_function,
-                self._fit_setup_kwargs,
-                name=self.name,
-                meta_config=self._meta_config,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-            )
-            self._setup_old = setup
-        elif (
-            prior_keys != self._prior_keys_old or prior_values != self._prior_values_old
-        ):
-            self._layout, self._fit = update_layout_from_prior(
-                dict(zip(prior_keys, prior_values)),
-                self.fit,
-                setup=setup,
-                name=self.name,
-                meta_config=self._meta_config,
-                use_default_content=self._use_default_content,
-                get_additional_content=self.get_additional_content,
-                plots=self.plots,
-            )
+        if meta_values != self._meta_values_old:
+            self._meta_values_old = meta_values
+            self._update_layout_from_meta(meta_values)
+        elif prior_keys != self._prior_keys_old or prior_values != self._prior_values_old:
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
-        return self.layout
-
-    _update_layout_callback.args = UPDATE_LAYOUT_CALLBACK_ARGS
-    _update_layout_callback.kwargs = {"prevent_initial_call": True}
+            self._update_layout_from_prior(prior_keys, prior_values, meta_values=meta_values)
+        return self.layout.children
 
     def _save_fit_callback(self, *args, **kwargs):
         with NamedTemporaryFile() as out:
             out.write(dumps(self.fit))
             return dcc.send_file(out.name, filename="fit.p")
-
-    _save_fit_callback.args = SAVE_FIT_CALLBACK_ARGS
-    _save_fit_callback.kwargs = {"prevent_initial_call": True}
-
-    def _export_prior_callback(self, *args, **kwargs):
-        return toggle_prior_widget(*args, **kwargs)
-
-    _export_prior_callback.args = EXPORT_PRIOR_CALLBACK_ARGS
-    _export_prior_callback.kwargs = {"prevent_initial_call": True}
 
 
 def run_server(
@@ -282,9 +242,8 @@ def run_server(
     fit_setup_function: Optional[Callable[[Any], nonlinear_fit]] = None,
     fit_setup_kwargs: Optional[Dict] = None,
     meta_config: Optional[List[Dict]] = None,
-    use_default_content: Optional[bool] = True,
-    get_additional_content: Optional[Callable[[nonlinear_fit], html.Base]] = None,
-    additional_plots: Optional[Dict[str, Callable]] = None,
+    additional_plots: Optional[List[Dict[str, Callable]]] = None,
+    tex_function: bool = True,
     run_app: bool = True,
     debug: bool = True,
     host: str = "localhost",
@@ -304,6 +263,7 @@ def run_server(
             These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
         use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
         get_additional_content: Function used to determine dynamic content depending on fit results.
+        tex_function: Try to render the fit function as latex.
         additional_plots: List of dictionaries specifying plots rendered in the tab element.
             Must contain at least the `name: str` and `fcn:Callable[[nonlinear_fit], Figure]` items.
             This populates :attr:`FitGUI.plots`.
@@ -339,11 +299,12 @@ def run_server(
         fit_setup_function=fit_setup_function,
         fit_setup_kwargs=fit_setup_kwargs,
         meta_config=meta_config,
-        use_default_content=use_default_content,
+        template_cls=DefaultBodyTemplate,
     )
     fit_gui.name = name
-    fit_gui.get_additional_content = get_additional_content
-    fit_gui.plots += additional_plots or []
+    assert isinstance(fit_gui.body, DefaultBodyTemplate)
+    fit_gui.body.tex_function = tex_function
+    fit_gui.body.plots += additional_plots or []
     fit_gui.setup_app()
     if run_app:
         fit_gui.run_server(host=host, debug=debug, port=port)

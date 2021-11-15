@@ -1,5 +1,5 @@
 """Widget for exporting priors."""
-from typing import Dict
+from typing import Dict, Union, Tuple, List
 
 import json
 import yaml
@@ -11,6 +11,10 @@ from dash import html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
+
+from lsqfitgui.util.callback import CallbackWrapper
+
+SerializedGVar = Union[str, Tuple[float, float]]
 
 
 class GVarEncoder(json.JSONEncoder):
@@ -37,9 +41,11 @@ def gv_dict_to_yaml(gv_dict, gv_as_string: bool = True, **kwargs):
 
     See also https://github.com/ckoerber/lsqfit-gui/issues/2#issuecomment-939055226
     """
-    cast_yaml_type = str if gv_as_string else lambda el: (el.mean, el.sdev)
 
-    output = {}
+    def cast_yaml_type(el: GVar) -> SerializedGVar:
+        return str(el) if gv_as_string else (el.mean, el.sdev)
+
+    output: Dict[str, Union[SerializedGVar, List[SerializedGVar]]] = {}
     for key, val in gv_dict.items():
         if hasattr(gv_dict[key], "__len__"):
             output[key] = [cast_yaml_type(g) for g in val]
@@ -116,8 +122,14 @@ def toggle_prior_widget(n1, n2, is_open):
     return is_open
 
 
-EXPORT_PRIOR_CALLBACK_ARGS = (
-    Output("prior-modal", "is_open"),
-    [Input("export-prior-button", "n_clicks"), Input("close-prior-button", "n_clicks")],
-    [State("prior-modal", "is_open")],
+EXPORT_PRIOR_CALLBACK = CallbackWrapper(
+    toggle_prior_widget,
+    args=(
+        Output("prior-modal", "is_open"),
+        [
+            Input("export-prior-button", "n_clicks"),
+            Input("close-prior-button", "n_clicks"),
+        ],
+        [State("prior-modal", "is_open")],
+    ),
 )

@@ -7,16 +7,18 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
-from lsqfitgui.plot.fit import plot_fit, plot_residuals
+from lsqfitgui.plot.fit import plot_fit, plot_residuals, RESIDUALS_DESCRIPTION
 from lsqfitgui.plot.uncertainty import plot_gvar
 from lsqfitgui.util.function import parse_function_expression
 from lsqfitgui.util.versions import get_entrypoint_string, get_version_string
+from lsqfitgui.util.callback import CallbackWrapper
 
 
 def document_function(
     fcn: Callable,
     parameters: Optional[Dict] = None,
     x_dict_keys: Optional[List[str]] = None,
+    tex_function: bool = True,
 ) -> List[html.Base]:
     """Documents the function."""
     documentation = []
@@ -42,7 +44,7 @@ def document_function(
         html.Pre(get_entrypoint_string() + "\n" + get_version_string())
     )
 
-    if parameters:
+    if parameters and tex_function:
         tex = parse_function_expression(fcn, parameters, x_dict_keys=x_dict_keys)
         if tex:
             documentation.append(html.P(fr"$${tex}$$"))
@@ -87,21 +89,19 @@ def _toggle_function_source_collapse(n, is_open):
     return not is_open if n else is_open
 
 
-FCN_SOURCE_CALLBACK = _toggle_function_source_collapse
-FCN_SOURCE_CALLBACK.args = (
-    Output("collapse-function-source", "is_open"),
-    [Input("collapse-function-source-button", "n_clicks")],
-    [State("collapse-function-source", "is_open")],
+FCN_SOURCE_CALLBACK = CallbackWrapper(
+    _toggle_function_source_collapse,
+    args=(
+        Output("collapse-function-source", "is_open"),
+        [Input("collapse-function-source-button", "n_clicks")],
+        [State("collapse-function-source", "is_open")],
+    ),
 )
 
 
-DEFAULT_PLOTS = [
+DEFAULT_PLOTS: List[Dict[str, Any]] = [
     {"name": "Fit", "fcn": plot_fit},
-    {
-        "name": "Residuals",
-        "fcn": plot_residuals,
-        "description": plot_residuals.description,
-    },
+    {"name": "Residuals", "fcn": plot_residuals, "description": RESIDUALS_DESCRIPTION},
 ]
 """Plots which are added to the GUI by default."""
 
@@ -132,66 +132,3 @@ def get_figures(fit, plots: Optional[List[Dict[str, Any]]] = None):
             }
         )
     return figure_data
-
-
-def get_content(
-    fit, name: str = "Lsqfit GUI", plots: Optional[List[Dict[str, Any]]] = None,
-):
-    """Create default content block for fit object.
-
-    This includes the plots for the data, residuals and details.
-    """
-    figure_data = get_figures(fit, plots)
-    content = html.Div(
-        children=[
-            html.H1(children=name),
-            html.Div(
-                html.Div(
-                    [
-                        html.H4("Fit function"),
-                        html.Div(
-                            document_function(
-                                fit.fcn,
-                                fit.p,
-                                x_dict_keys=list(fit.x.keys())
-                                if isinstance(fit.x, dict)
-                                else None,
-                            )
-                        ),
-                        html.H4("Fit parameters"),
-                        html.Pre(str(fit)),
-                    ],
-                    className="col",
-                ),
-                className="row",
-            ),
-            dcc.Tabs(
-                [
-                    dcc.Tab(
-                        children=[dcc.Graph(figure=data["figure"])]
-                        + (
-                            [html.P(data["description"])]
-                            if data.get("description")
-                            else []
-                        ),
-                        label=data["label"],
-                        value=data["tab-value"],
-                    )
-                    for data in figure_data
-                ]
-                + [
-                    dcc.Tab(
-                        children=[html.Pre(str(fit.format(maxline=True)))],
-                        label="Details",
-                        value="tab-details",
-                    )
-                ],
-                value=figure_data[0]["tab-value"] if figure_data else "tab-details",
-                persistence=True,
-                persistence_type="local",
-                persisted_props=["value"],
-                id="content-tabs",
-            ),
-        ]
-    )
-    return content
