@@ -84,13 +84,11 @@ class FitGUI:
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
-        self._layout = None
         self._body = template_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
             raise ValueError(
-                "You must either specify the fit or fit setup function"
-                " to initialize the GUI."
+                "You must either specify the fit or fit setup function" " to initialize the GUI."
             )
         elif fit_setup_function is not None:
             self._initial_fit = fit_setup_function(**self._fit_setup_kwargs)
@@ -105,18 +103,13 @@ class FitGUI:
                 )
 
         if not allclose(
-            evalcorr(self.initial_fit.prior.flatten()),
-            eye(len(self.initial_fit.prior.flatten())),
+            evalcorr(self.initial_fit.prior.flatten()), eye(len(self.initial_fit.prior.flatten())),
         ):
             raise NotImplementedError("Prior of original fit contains correlations.")
 
         self._callbacks: List[CallbackWrapper] = [
-            CallbackWrapper(
-                self._update_layout_callback, self.body.update_callback_args
-            ),
-            CallbackWrapper(
-                self._save_fit_callback, self.body.sidebar.save_fit_callback_args
-            ),
+            CallbackWrapper(self._update_layout_callback, self.body.update_callback_args),
+            CallbackWrapper(self._save_fit_callback, self.body.sidebar.save_fit_callback_args),
             self.body.sidebar.export_prior_callback,
         ] + self.body.additional_callbacks
 
@@ -202,44 +195,39 @@ class FitGUI:
 
     # Callbacks
 
-    def _update_layout_from_prior(self, prior, meta_values: Optional[List[str]] = None):
+    def _update_layout_from_prior(
+        self, prior_keys, prior_values, meta_values: Optional[List[str]] = None
+    ):
         """Parse prior form input values to create new layout.
 
         Creates new fit object for new prior and calls get_layout.
         """
         meta = process_meta(meta_values, self._meta_config)
-        new_fit = process_priors(prior, self.fit)
-        self.body.update(new_fit, meta)
-        return self.layout, new_fit
+        prior = dict(zip(prior_keys, prior_values))
+        self._fit = process_priors(prior, self.fit)
+        self.body.update(self.fit, meta)
 
-    def _update_layout_from_meta(self, inp):
+    def _update_layout_from_meta(self, meta_values):
         """Parse meta form input values to create new layout.
 
         Creates new fit object for new meta data and prior (using fit_setup_function)
         and calls get_layout.
         """
-        meta = process_meta(inp, self._meta_config)
-        meta = {
-            key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()
-        }
-        new_fit = self._fit_setup_function(**meta)
-        self.body.update(new_fit, meta)
-        return self.layout, new_fit
+        meta = process_meta(meta_values, self._meta_config)
+        meta = {key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()}
+        self._fit = self._fit_setup_function(**meta)
+        self.body.update(self.fit, meta)
 
     def _update_layout_callback(self, prior_ids, prior_values, meta_values):
         """Update the layout given new prior input."""
         prior_keys = [idx["name"] for idx in prior_ids]
         if meta_values != self._meta_values_old:
-            self._layout, self._fit = self._update_layout_from_meta(meta_values)
             self._meta_values_old = meta_values
-        elif (
-            prior_keys != self._prior_keys_old or prior_values != self._prior_values_old
-        ):
-            self._layout, self._fit = self._update_layout_from_prior(
-                dict(zip(prior_keys, prior_values)), meta_values=meta_values
-            )
+            self._update_layout_from_meta(meta_values)
+        elif prior_keys != self._prior_keys_old or prior_values != self._prior_values_old:
             self._prior_keys_old = prior_keys
             self._prior_values_old = prior_values
+            self._update_layout_from_prior(prior_keys, prior_values, meta_values=meta_values)
         return self.layout.children
 
     def _save_fit_callback(self, *args, **kwargs):
