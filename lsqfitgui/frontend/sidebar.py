@@ -15,9 +15,7 @@ from lsqfitgui.frontend.widgets.export_prior import (
 )
 
 
-def get_float_widget(
-    name: str, value: float, input_only: bool = False, **kwargs
-) -> dbc.Row:
+def get_float_widget(name: str, value: float, input_only: bool = False, **kwargs) -> dbc.Row:
     """Create form group for float input."""
     inp = dbc.Input(
         type="number",
@@ -118,6 +116,8 @@ class Sidebar:
                 config["value"] = meta[name]
 
                 if "options" in config:
+                    if hasattr(config["options"], "__call__"):
+                        config["options"] = config["options"](**meta)
                     inp = dbc.Select(**config)
                 else:
                     config["className"] = "form-control-sm"
@@ -127,10 +127,7 @@ class Sidebar:
 
                 meta_elements.append(
                     dbc.Row(
-                        [
-                            dbc.Col(dbc.Label(name, html_for=f"input-meta-{name}")),
-                            dbc.Col(inp),
-                        ],
+                        [dbc.Col(dbc.Label(name, html_for=f"input-meta-{name}")), dbc.Col(inp)],
                     )
                 )
             meta_elements.append(html.Hr())
@@ -148,12 +145,8 @@ class Sidebar:
                             dbc.Label(html.Small(n), html_for=f"input-prior-{name}"),
                             className="ps-4",
                         ),
-                        html.Td(
-                            get_float_widget(f"{name}-mean", dist.mean, input_only=True)
-                        ),
-                        html.Td(
-                            get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)
-                        ),
+                        html.Td(get_float_widget(f"{name}-mean", dist.mean, input_only=True)),
+                        html.Td(get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)),
                     ]
                     table_rows.append(html.Tr(row_content))
 
@@ -162,12 +155,8 @@ class Sidebar:
                 dist = val
                 row_content = [
                     html.Td(dbc.Label(name, html_for=f"input-prior-{name}")),
-                    html.Td(
-                        get_float_widget(f"{name}-mean", dist.mean, input_only=True)
-                    ),
-                    html.Td(
-                        get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)
-                    ),
+                    html.Td(get_float_widget(f"{name}-mean", dist.mean, input_only=True)),
+                    html.Td(get_float_widget(f"{name}-sdev", dist.sdev, input_only=True)),
                 ]
                 table_rows.append(html.Tr(row_content))
 
@@ -179,9 +168,7 @@ class Sidebar:
                     dbc.Table(
                         [
                             html.Thead(
-                                html.Tr(
-                                    [html.Th("name"), html.Th("mean"), html.Th("sdev")]
-                                )
+                                html.Tr([html.Th("name"), html.Th("mean"), html.Th("sdev")])
                             ),
                             html.Tbody(table_rows),
                         ],
