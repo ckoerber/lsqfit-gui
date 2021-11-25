@@ -74,7 +74,7 @@ class Sidebar:
         self._meta_config: List[Dict[str, Any]] = meta_config or []
 
     @property
-    def meta_config(self) -> Optional[Dict]:
+    def meta_config(self) -> Optional[List[Dict[str, Any]]]:
         """Return current meta config."""
         return self._meta_config
 

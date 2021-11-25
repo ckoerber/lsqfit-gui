@@ -38,6 +38,7 @@ class FitGUI:
         fit_setup_function: Optional[Callable] = None,
         fit_setup_kwargs: Optional[Dict] = None,
         meta_config: Optional[List[Dict]] = None,
+        meta_validator: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
         template_cls: Type[BodyTemplate] = DefaultBodyTemplate,
     ):
         """Initialize the fit gui.
@@ -53,7 +54,9 @@ class FitGUI:
             meta_config: Configuration for the fit_setup_kwargs represented in the GUI.
                 These must match `dcc.Input <https://dash.plotly.com/dash-core-components/input#input-properties>`_ arguments.
             use_default_content: Add default elements like the function documentation and plot tabs to the GUI.
-            template_cls: Class which renders the html body. Must inherit from  :class:`lsqfitgui.frontend.body.BodyTemplate`.
+            meta_validator: Function which checks meta keywords and raises exceptions or adjusts to suiteable keys (needed, i.e., when different meta parameter influence others).
+            template_cls: Class which renders the html body.
+                Must inherit from :class:`lsqfitgui.frontend.body.BodyTemplate`.
 
         Example:
             The most basic example just requires a nonlinear_fit object::
@@ -84,6 +87,7 @@ class FitGUI:
         self._fit_setup_function = fit_setup_function
         self._fit_setup_kwargs = fit_setup_kwargs or {}
         self._meta_config = meta_config
+        self.meta_validator = meta_validator
         self._body = template_cls(self.name, self._meta_config)
 
         if fit is None and fit_setup_function is None:
@@ -202,7 +206,7 @@ class FitGUI:
 
         Creates new fit object for new prior and calls get_layout.
         """
-        meta = process_meta(meta_values, self._meta_config)
+        meta = process_meta(meta_values, self._meta_config, meta_validator=self.meta_validator)
         prior = dict(zip(prior_keys, prior_values))
         self._fit = process_priors(prior, self.fit)
         self.body.update(self.fit, meta)
@@ -213,7 +217,7 @@ class FitGUI:
         Creates new fit object for new meta data and prior (using fit_setup_function)
         and calls get_layout.
         """
-        meta = process_meta(meta_values, self._meta_config)
+        meta = process_meta(meta_values, self._meta_config, meta_validator=self.meta_validator)
         meta = {key: meta.get(key) or val for key, val in self._fit_setup_kwargs.items()}
         self._fit = self._fit_setup_function(**meta)
         self.body.update(self.fit, meta)
