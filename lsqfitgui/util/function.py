@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, List
 import re
 import importlib.util
 import sympy
+from numpy import ndarray
 
 
 def parse_function(string: str):
@@ -45,20 +46,17 @@ def parse_function_expression(
             else {key: sympy.Symbol("x") for key in x_dict_keys}
         )
         f_expr = fcn(x=xx, p=expressions)
-        s = (
-            "\\begin{aligned}\n"
-            + (
-                r" \\ ".join(
-                    [
-                        sympy.latex(sympy.Symbol(key)) + " &= " + sympy.latex(val)
-                        for key, val in f_expr.items()
-                    ]
-                )
-                if isinstance(f_expr, dict)
-                else sympy.latex(f_expr)
-            )
-            + "\n\\end{aligned}\n"
-        )
+        if isinstance(f_expr, dict):
+            lines = [
+                sympy.latex(sympy.Symbol(key)) + " &= " + sympy.latex(val)
+                for key, val in f_expr.items()
+            ]
+            s = "\\begin{aligned}\n" + r" \\ ".join(lines) + "\n\\end{aligned}\n"
+        elif isinstance(f_expr, (list, ndarray)):
+            lines = [" & " + sympy.latex(val) for val in f_expr]
+            s = "\\begin{aligned}\n" + r" \\ ".join(lines) + "\n\\end{aligned}\n"
+        else:
+            s = sympy.latex(f_expr)
         s = re.sub(r"\+\s+\-", "-", s)
     except Exception:
         s = None

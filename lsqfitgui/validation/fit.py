@@ -12,6 +12,7 @@ from lsqfitgui.util.models import (
     lsqfit_from_multi_model_fit_wrapper,
 )
 from lsqfitgui.util.prior import fit_with_prior_dict, fit_with_prior_dict_wrapper
+from lsqfitgui.util.data import fit_with_xy, fit_with_xy_wrapper
 from lsqfitgui.validation.exceptions import SetupException
 
 
@@ -57,9 +58,19 @@ def process_fit(
         except Exception as e:
             raise SetupException([e])
 
+    # Check if data is a tuple of two
+    if not isinstance(initial_fit.data, tuple):
+        try:
+            initial_fit = fit_with_xy(initial_fit)
+            if fit_setup_function is not None:
+                fit_setup_function = fit_with_xy_wrapper(fit_setup_function)
+                initial_fit = fit_setup_function(**fit_setup_kwargs)
+        except Exception as e:
+            raise SetupException([e])
+
     # Check if prior is a dict and if not adjust objects
     if not isinstance(initial_fit.prior, (dict, BufferDict)):
-        if not isinstance(fit.prior, (list, ndarray)):
+        if not isinstance(initial_fit.prior, (list, ndarray)):
             raise SetupException(
                 [TypeError("Prior must be either a dict or an array.")]
             )
