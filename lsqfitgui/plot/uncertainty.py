@@ -178,7 +178,9 @@ def plot_errorbars(
     trace_kwargs: Optional[Dict[str, Any]] = None,
 ):
     """Scatter plot with data errors."""
-    x = np.arange(len(y)) if (not x or not isinstance(x, (list, np.ndarray))) else x
+    if not isinstance(x, (list, np.ndarray)) or len(x) == 0:
+        x = np.arange(len(y))
+
     scatter_kwargs = scatter_kwargs or {}
     trace_kwargs = trace_kwargs or {}
     fig.add_trace(
@@ -203,7 +205,7 @@ def plot_band(
     trace_kwargs: Optional[Dict[str, Any]] = None,
 ):
     """Error band plot."""
-    if not x or not isinstance(x, (list, np.ndarray)):
+    if not isinstance(x, (list, np.ndarray)) or len(x) == 0:
         x = np.arange(len(y_mean))
 
     trace_kwargs = trace_kwargs or {}

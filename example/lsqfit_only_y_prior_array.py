@@ -11,18 +11,19 @@ from lsqfitgui import run_server
 
 XX = np.arange(0, 4, 1.0)
 YY = gv.gvar(len(XX) * ["1(1)"])
+PRIOR = gv.gvar(2 * ["0.5(5)"])
 
 
 def fcn(p, x=XX):
     return p[0] + x * p[1]
 
 
+FIT = lsqfit.nonlinear_fit(data=YY, prior=PRIOR, fcn=fcn)
+
+
 def main():
     """Run the fit gui."""
-    prior = gv.gvar(2 * ["0.5(5)"])
-    fit = lsqfit.nonlinear_fit(data=YY, prior=prior, fcn=fcn)
-
-    run_server(fit=fit)
+    run_server(fit=FIT)
 
 
 if __name__ == "__main__":
