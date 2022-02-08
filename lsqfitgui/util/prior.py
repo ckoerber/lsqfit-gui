@@ -6,9 +6,15 @@ def fit_with_prior_dict(fit: nonlinear_fit,) -> nonlinear_fit:
     """Convert a fit with prior array to a fit with a prior dict."""  # noqa: D202
 
     def fcn(x, p):
-        return fit.fcn(x, p["prior"])
+        return fit.fcn(x, p["p"])
 
-    return nonlinear_fit(fit.data, fcn=fcn, prior={"prior": fit.prior})
+    fcn._lsqfitgui_fcn_src = (
+        fit.fcn._lsqfitgui_fcn_src
+        if hasattr(fit.fcn, "_lsqfitgui_fcn_src")
+        else fit.fcn
+    )
+
+    return nonlinear_fit(fit.data, fcn=fcn, prior={"p": fit.prior})
 
 
 def fit_with_prior_dict_wrapper(fcn):

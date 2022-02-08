@@ -23,16 +23,23 @@ def document_function(
     if fcn is None:
         return None
 
+    # In case function was wrapped, pick up the source function
+    fcn_source = fcn._lsqfitgui_fcn_src if hasattr(fcn, "_lsqfitgui_fcn_src") else fcn
+
     fcn_name = (
-        fcn.__qualname__
-        if hasattr(fcn, "__qualname__") and fcn.__qualname__
-        else (fcn.__name__ if hasattr(fcn, "__name__") and fcn.__name__ else None)
+        fcn_source.__qualname__
+        if hasattr(fcn_source, "__qualname__") and fcn_source.__qualname__
+        else (
+            fcn_source.__name__
+            if hasattr(fcn_source, "__name__") and fcn_source.__name__
+            else None
+        )
     )
     if fcn_name:
         fcn_string = "```python\n"
         fcn_string += (
-            f"from {fcn.__module__} import "
-            if hasattr(fcn, "__module__") and fcn.__module__
+            f"from {fcn_source.__module__} import "
+            if hasattr(fcn_source, "__module__") and fcn_source.__module__
             else ""
         )
         fcn_string += fcn_name + "\n```"
@@ -51,7 +58,7 @@ def document_function(
         documentation.append(html.Pre(html.Code(fcn.__doc__)))
 
     try:
-        source = getsource(fcn)
+        source = getsource(fcn_source)
     except Exception:
         source = "Unable to load source"
     finally:

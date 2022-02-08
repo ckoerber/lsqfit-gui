@@ -21,6 +21,9 @@ def lsqfit_from_multi_model_fit(
     def fcn(x, p):
         return {m.datatag: m.fitfcn(m.buildprior(p)) for m in models}
 
+    # assumes all models have the same class
+    fcn._lsqfitgui_fcn_src = models[0].fitfcn
+
     fit = nonlinear_fit((x_data, y_data), fcn=fcn, prior=prior)
     fit.models = models
 
