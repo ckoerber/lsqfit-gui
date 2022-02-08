@@ -7,10 +7,8 @@ from typing import Optional, Callable, Dict, List, Any
 
 from tempfile import NamedTemporaryFile
 
-from numpy import eye, allclose
-from gvar import dumps, evalcorr
+from gvar import dumps
 from lsqfit import nonlinear_fit
-from lsqfit._extras import unchained_nonlinear_fit
 
 from dash import Dash, html, dcc
 
@@ -28,10 +26,7 @@ from lsqfitgui.frontend.dashboard import (
     FCN_SOURCE_CALLBACK,
     DEFAULT_PLOTS,
 )
-from lsqfitgui.util.models import (
-    lsqfit_from_multi_model_fit,
-    lsqfit_from_multi_model_fit_wrapper,
-)
+from lsqfitgui.validation import process_fit
 
 
 class FitGUI:
@@ -121,28 +116,12 @@ class FitGUI:
         if self._use_default_content:
             self.plots += DEFAULT_PLOTS
 
-        if fit is None and fit_setup_function is None:
-            raise ValueError(
-                "You must either specify the fit or fit setup function"
-                " to initialize the GUI."
-            )
-        elif fit_setup_function is not None:
-            self._initial_fit = fit_setup_function(**self._fit_setup_kwargs)
-        else:
-            self._initial_fit = fit
-
-        if isinstance(self._initial_fit, unchained_nonlinear_fit):
-            self._initial_fit = lsqfit_from_multi_model_fit(self._initial_fit)
-            if self._fit_setup_function is not None:
-                self._fit_setup_function = lsqfit_from_multi_model_fit_wrapper(
-                    self._fit_setup_function
-                )
-
-        if not allclose(
-            evalcorr(self.initial_fit.prior.flatten()),
-            eye(len(self.initial_fit.prior.flatten())),
-        ):
-            raise NotImplementedError("Prior of original fit contains correlations.")
+        self._initial_fit, self._fit_setup_function = process_fit(
+            fit=fit,
+            fit_setup_function=self._fit_setup_function,
+            fit_setup_kwargs=self._fit_setup_kwargs,
+            meta_config=self._meta_config,
+        )
 
         self._callbacks = [
             self._update_layout_callback,
@@ -219,7 +198,7 @@ class FitGUI:
         return self._app
 
     def run_server(self, *args, **kwargs):
-        """Wrapper to self.app.run_server."""
+        """Wrap self.app.run_server."""
         if not self.app:
             self.setup_app()
         return self.app.run_server(*args, **kwargs)
