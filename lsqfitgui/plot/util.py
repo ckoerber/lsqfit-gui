@@ -20,7 +20,9 @@ LOG_MENU = dict(
                 method="relayout",
             ),
             dict(
-                args=[{"yaxis": {"type": "log"}}], label="Log Scale", method="relayout",
+                args=[{"yaxis": {"type": "log"}}],
+                label="Log Scale",
+                method="relayout",
             ),
         ]
     ),
@@ -52,23 +54,55 @@ def get_fit_bands(fit):  # add type hint
     return x, m - s, m, m + s
 
 
-def get_residuals(fit):
+def get_residuals(fit, with_prior: bool = False):
     """Get residuals for fit."""
-    if isinstance(fit, (chained_nonlinear_fit, unchained_nonlinear_fit)):
-        y_fit = fit.fcn(fit.p)
-    elif isinstance(fit, nonlinear_fit):
-        y_fit = fit.fcn(fit.x, fit.p)
-    else:
-        raise ValueError(f"Did not understand fit input of type {type(fit)}")
+    # this is a flat array; this removes prior information
+    residuals = get_weighted_residuals_fit(fit)[: -len(fit.prior.flatten())]
 
-    if not isinstance(fit.y, (dict, gv.BufferDict)):
-        res = (gv.mean(fit.y) - y_fit) / gv.sdev(fit.y)
-    else:
-        res = {}
-        for key, val in y_fit.items():
-            res[key] = (gv.mean(fit.y[key]) - val) / gv.sdev(fit.y[key])
+    if isinstance(fit.y, (dict, gv.BufferDict)):
+        r = gv.BufferDict()
+        n = 0
+        for key, val in fit.y.items():
+            nn = n + len(val)
+            r[key] = residuals[n:nn]
+            n = nn
+        residuals = r
 
-    return res
+    return residuals
+
+
+def get_weighted_residuals_fit(fit):
+
+    target = np.concatenate([fit.fcn(fit.x, fit.p).flat, fit.p.flat])
+    base = np.concatenate([fit.y.flat, fit.prior.flat])
+
+    return get_weighted_residuals(target, base, fit.fdata.inv_wgts)
+
+
+def get_weighted_residuals(target, base, inv_wgts):
+    """Approach of including correlations in residuals plot.
+
+    Follows
+    https://github.com/gplepage/lsqfit/blob/1f1a8fdac5801c1cfec14a8d37bd23b056764bdf/src/lsqfit/__init__.py#L1897
+    and
+    https://github.com/gplepage/lsqfit/blob/1f1a8fdac5801c1cfec14a8d37bd23b056764bdf/src/lsqfit/_utilities.pyx#L59
+    """
+
+    delta = (target - gv.mean(base)).flatten()
+    ans = np.zeros(sum(len(wgts) for _, wgts in inv_wgts), dtype=float) * gv.gvar(0, 0)
+
+    iw, wgts = inv_wgts[0]
+    i1 = 0
+    i2 = len(iw)
+    if i2 > 0:
+        ans[i1:i2] = wgts * delta[iw]
+
+    for iw, wgt in inv_wgts[1:]:
+        i1 = i2
+        i2 += len(wgt)
+        ans[i1:i2] += delta[iw] * wgt if len(wgt.shape) == 1 else wgt @ delta[iw]
+
+    return ans
 
 
 get_residuals.description = r"""The residuals are defined by
