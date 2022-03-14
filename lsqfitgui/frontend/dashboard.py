@@ -56,12 +56,12 @@ def get_layout(
             children=[
                 html.Div(
                     children=sidebar,
-                    className="col-xs-12 col-sm-5 col-md-4 col-xl-3 col-xxl-2",
+                    className="col-xs-12 col-sm-6 col-md-5 col-xl-4 col-xxl-3",
                     id="sticky-sidebar",
                 ),
                 html.Div(
                     children=[content, additional_content],
-                    className="col-xs-12 col-sm-7 col-md-8 col-xl-9 col-xxl-10",
+                    className="col-xs-12 col-sm-6 col-md-7 col-xl-8 col-xxl-9",
                 ),
             ],
             className="row py-3",
