@@ -346,5 +346,10 @@ def run_server(
     fit_gui.plots += additional_plots or []
     fit_gui.setup_app()
     if run_app:
+        import webbrowser
+        from threading import Timer
+
+        Timer(1, lambda: webbrowser.open_new(f"http://{host}:{port}")).start()
         fit_gui.run_server(host=host, debug=debug, port=port)
+
     return fit_gui
